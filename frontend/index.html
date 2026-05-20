@@ -1,44 +1,107 @@
 <!DOCTYPE html>
+<!-- Indique que c'est une page HTML5 -->
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeGrimoire</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-950 text-white min-h-screen">
+<!-- lang="fr" : dit au navigateur que la page est en français -->
 
-    <!-- Barre de navigation -->
+<head>
+    <!-- Le head contient les infos de la page, invisible pour l'utilisateur -->
+    <meta charset="UTF-8">
+    <!-- UTF-8 : permet d'afficher les accents et caractères spéciaux -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Rend la page responsive sur mobile -->
+    
+    <title>CodeGrimoire</title>
+    <!-- Le titre affiché dans l'onglet du navigateur -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Charge Tailwind CSS depuis internet pour utiliser ses classes de style -->
+</head>
+
+<body class="bg-gray-950 text-white min-h-screen">
+<!-- body : tout ce que l'utilisateur voit -->
+<!-- bg-gray-950 : fond très sombre -->
+<!-- text-white : texte blanc par défaut -->
+<!-- min-h-screen : hauteur minimum = hauteur de l'écran -->
+
+    <!-- ============ BARRE DE NAVIGATION ============ -->
     <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+    <!-- nav : zone de navigation principale -->
+    <!-- bg-gray-900 : fond gris foncé -->
+    <!-- border-b border-gray-700 : bordure en bas -->
+    <!-- px-6 py-4 : espacement intérieur (gauche/droite et haut/bas) -->
+    <!-- flex items-center : aligne les éléments côte à côte et centrés -->
+    <!-- justify-between : pousse les éléments aux deux extrémités -->
+    
         <h1 class="text-xl font-bold text-purple-400">CodeGrimoire</h1>
+        <!-- h1 : titre principal de la page -->
+        <!-- text-xl : grande taille de texte -->
+        <!-- font-bold : texte en gras -->
+        <!-- text-purple-400 : couleur violette -->
+
         <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+        <!-- button : bouton cliquable -->
+        <!-- bg-purple-600 : fond violet -->
+        <!-- hover:bg-purple-700 : fond violet plus foncé au survol -->
+        <!-- rounded-lg : bords arrondis -->
             + Nouveau snippet
         </button>
     </nav>
 
-    <!-- Contenu principal -->
+    <!-- ============ CONTENU PRINCIPAL ============ -->
     <div class="flex h-screen">
+    <!-- div : boîte conteneur -->
+    <!-- flex : place les enfants côte à côte -->
+    <!-- h-screen : prend toute la hauteur de l'écran -->
 
-        <!-- Sidebar gauche -->
+        <!-- ============ SIDEBAR GAUCHE ============ -->
         <aside class="w-80 bg-gray-900 border-r border-gray-700 flex flex-col">
+        <!-- aside : panneau latéral -->
+        <!-- w-80 : largeur fixe de 320px -->
+        <!-- border-r : bordure à droite pour séparer du contenu -->
+        <!-- flex flex-col : place les enfants en colonne -->
+
             <div class="p-4">
+            <!-- p-4 : espacement intérieur de 16px -->
                 <input 
                     type="text" 
                     placeholder="Rechercher un snippet..." 
                     class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg text-sm border border-gray-600 focus:outline-none focus:border-purple-500"
                 >
+                <!-- input : champ de saisie texte -->
+                <!-- w-full : prend toute la largeur disponible -->
+                <!-- focus:border-purple-500 : bordure violette quand on clique dessus -->
             </div>
+
             <div class="flex-1 overflow-y-auto px-4" id="liste-snippets">
+            <!-- flex-1 : prend tout l'espace vertical restant -->
+            <!-- overflow-y-auto : scroll vertical si trop de contenu -->
+            <!-- id="liste-snippets" : identifiant pour JavaScript -->
                 <p class="text-gray-500 text-sm text-center mt-8">Aucun snippet pour l'instant</p>
+                <!-- text-gray-500 : texte gris -->
+                <!-- mt-8 : marge en haut -->
             </div>
         </aside>
 
-        <!-- Zone principale droite -->
+        <!-- ============ ZONE PRINCIPALE DROITE ============ -->
         <main class="flex-1 bg-gray-950 p-6">
+        <!-- main : zone de contenu principale -->
+        <!-- flex-1 : prend tout l'espace restant après la sidebar -->
+        <!-- p-6 : espacement intérieur de 24px -->
+
             <div id="detail-snippet">
+            <!-- id="detail-snippet" : identifiant pour JavaScript -->
+
                 <div class="flex items-center justify-between mb-4">
+                <!-- flex justify-between : titre à gauche, boutons à droite -->
+                <!-- mb-4 : marge en bas -->
+                
                     <h2 class="text-xl font-bold">Titre du snippet</h2>
+                    <!-- h2 : titre secondaire -->
+
                     <div class="flex gap-2">
+                    <!-- gap-2 : espace entre les boutons -->
+                    
                         <button class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
                             Copier
                         </button>
@@ -46,11 +109,16 @@
                             Modifier
                         </button>
                         <button class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                        <!-- bg-red-700 : fond rouge pour le bouton danger -->
                             Supprimer
                         </button>
                     </div>
                 </div>
+
                 <pre class="bg-gray-900 rounded-lg p-4 overflow-x-auto text-sm text-green-400">
+                <!-- pre : affiche le texte tel quel, avec les espaces et retours à la ligne -->
+                <!-- overflow-x-auto : scroll horizontal si le code est trop long -->
+                <!-- text-green-400 : texte vert comme un vrai éditeur de code -->
 // Ton code apparaîtra ici
                 </pre>
             </div>
