@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeGrimoire - Nouveau snippet</title>
+    <!-- Charge Tailwind CSS depuis internet -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-950 text-white min-h-screen">
+<!-- bg-gray-950 : fond très sombre -->
+<!-- text-white : texte blanc par défaut -->
+
+    <!-- ============ BARRE DE NAVIGATION ============ -->
+    <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+        <h1 class="text-xl font-bold text-purple-400">CodeGrimoire</h1>
+        <!-- Bouton retour vers la page principale -->
+        <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm">
+            Retour
+        </a>
+    </nav>
+
+    <!-- ============ FORMULAIRE ============ -->
+    <div class="max-w-3xl mx-auto p-6">
+    <!-- max-w-3xl : largeur maximum de 768px -->
+    <!-- mx-auto : centre horizontalement -->
+    <!-- p-6 : espacement intérieur -->
+
+        <h2 class="text-2xl font-bold mb-6">Nouveau snippet</h2>
+        <!-- mb-6 : marge en bas -->
+
+        <form class="flex flex-col gap-4">
+        <!-- form : formulaire HTML -->
+        <!-- flex flex-col : empile les champs en colonne -->
+        <!-- gap-4 : espace entre les champs -->
+
+            <!-- Champ titre -->
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Titre</label>
+                <!-- label : étiquette du champ -->
+                <!-- block : affiche sur sa propre ligne -->
+                <input 
+                    type="text" 
+                    placeholder="Ex : Fonction de tri en JavaScript"
+                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                >
+            </div>
+
+            <!-- Champ langage -->
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Langage</label>
+                <select class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500">
+                <!-- select : liste déroulante -->
+                    <option value="">Choisir un langage</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="sql">SQL</option>
+                    <option value="php">PHP</option>
+                </select>
+            </div>
+
+            <!-- Champ tags -->
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Tags</label>
+                <input 
+                    type="text" 
+                    placeholder="Ex : tri, tableau, algorithme"
+                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                >
+            </div>
+
+            <!-- Champ code -->
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Code</label>
+                <textarea 
+                    rows="12"
+                    placeholder="Colle ton code ici..."
+                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 font-mono text-sm"
+                ></textarea>
+                <!-- textarea : zone de texte multi-lignes -->
+                <!-- rows="12" : hauteur de 12 lignes -->
+                <!-- font-mono : police monospace comme un éditeur de code -->
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex gap-3 justify-end">
+            <!-- justify-end : aligne les boutons à droite -->
+                <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
+                    Annuler
+                </a>
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                    Sauvegarder
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</body>
+</html>
