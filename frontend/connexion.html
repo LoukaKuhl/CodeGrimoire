@@ -1,47 +1,78 @@
 <!DOCTYPE html>
+<!-- Indique que c'est une page HTML5 -->
 <html lang="fr">
+<!-- lang="fr" : dit au navigateur que la page est en français -->
+
 <head>
     <meta charset="UTF-8">
+    <!-- UTF-8 : permet d'afficher les accents et caractères spéciaux -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Rend la page responsive sur mobile -->
     <title>CodeGrimoire - Connexion</title>
-    <!-- Charge Tailwind CSS depuis internet -->
+    <!-- Titre affiché dans l'onglet du navigateur -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Charge Tailwind CSS depuis internet -->
 </head>
 
 <body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
+<!-- bg-gray-950 : fond très sombre -->
+<!-- text-white : texte blanc par défaut -->
+<!-- min-h-screen : hauteur minimum = hauteur de l'écran -->
 <!-- flex items-center justify-center : centre le contenu au milieu de la page -->
 
     <!-- ============ CARTE DE CONNEXION ============ -->
     <div class="bg-gray-900 p-8 rounded-xl border border-gray-700 w-full max-w-md">
     <!-- bg-gray-900 : fond gris foncé -->
-    <!-- p-8 : espacement intérieur généreux -->
+    <!-- p-8 : espacement intérieur généreux de 32px -->
     <!-- rounded-xl : bords très arrondis -->
+    <!-- border border-gray-700 : bordure grise subtile -->
+    <!-- w-full : prend toute la largeur disponible -->
     <!-- max-w-md : largeur maximum de 448px -->
 
-        <!-- Titre -->
+        <!-- ===== Titre ===== -->
         <h1 class="text-2xl font-bold text-purple-400 text-center mb-2">CodeGrimoire</h1>
+        <!-- text-2xl : grande taille de texte -->
+        <!-- font-bold : texte en gras -->
+        <!-- text-purple-400 : couleur violette -->
         <!-- text-center : texte centré -->
         <!-- mb-2 : petite marge en bas -->
 
         <p class="text-gray-400 text-center text-sm mb-8">Connecte-toi pour accéder à tes snippets</p>
-        <!-- Sous-titre descriptif -->
+        <!-- text-gray-400 : texte gris clair -->
+        <!-- text-sm : petite taille de texte -->
+        <!-- mb-8 : grande marge en bas avant le formulaire -->
 
         <form class="flex flex-col gap-4">
+        <!-- form : formulaire HTML -->
+        <!-- flex flex-col : empile les champs en colonne -->
+        <!-- gap-4 : espace de 16px entre les champs -->
 
-            <!-- Champ email -->
+            <!-- ===== Champ email ===== -->
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Email</label>
+                <!-- label : étiquette du champ -->
+                <!-- block : affiche sur sa propre ligne -->
                 <input 
                     type="email"
                     placeholder="ton@email.com"
                     class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
                 >
                 <!-- type="email" : vérifie automatiquement le format email -->
+                <!-- focus:border-purple-500 : bordure violette quand on clique dessus -->
             </div>
 
-            <!-- Champ mot de passe -->
+            <!-- ===== Champ mot de passe ===== -->
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Mot de passe</label>
+                <div class="flex items-center justify-between mb-1">
+                <!-- flex justify-between : label à gauche, lien à droite -->
+                    <label class="block text-sm text-gray-400">Mot de passe</label>
+                    <a href="#" class="text-xs text-purple-400 hover:text-purple-300">
+                        Mot de passe oublié ?
+                    </a>
+                    <!-- a href="#" : lien vers la page de réinitialisation (à faire en S4) -->
+                    <!-- text-xs : très petit texte -->
+                    <!-- hover:text-purple-300 : violet plus clair au survol -->
+                </div>
                 <input 
                     type="password"
                     placeholder="••••••••"
@@ -50,14 +81,26 @@
                 <!-- type="password" : masque les caractères saisis -->
             </div>
 
-            <!-- Bouton connexion -->
+            <!-- ===== Bouton connexion ===== -->
             <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold mt-2">
                 Se connecter
             </button>
+            <!-- type="submit" : envoie le formulaire -->
             <!-- w-full : bouton pleine largeur -->
-            <!-- mt-2 : petite marge en haut -->
+            <!-- hover:bg-purple-700 : fond plus foncé au survol -->
 
         </form>
+
+        <!-- ===== Lien inscription ===== -->
+        <p class="text-center text-sm text-gray-500 mt-6">
+        <!-- mt-6 : marge en haut -->
+            Pas encore de compte ?
+            <a href="#" class="text-purple-400 hover:text-purple-300">
+                Créer un compte
+            </a>
+            <!-- Lien vers la page d'inscription (à faire en S4) -->
+        </p>
+
     </div>
 
 </body>
