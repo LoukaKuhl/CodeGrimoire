@@ -1,4 +1,4 @@
-// Importation des modules nécessaires
+// ============ IMPORTS ============
 const express = require('express')
 // express : framework pour créer le serveur web
 
@@ -8,28 +8,31 @@ const cors = require('cors')
 require('dotenv').config()
 // dotenv : charge les variables du fichier .env
 
-// Création du serveur
+// ============ CRÉATION DU SERVEUR ============
 const app = express()
 // app : notre serveur Express
 
-// Configuration du serveur
+// ============ CONFIGURATION ============
 app.use(cors())
 // Autorise les requêtes venant du frontend
 
 app.use(express.json())
 // Permet de lire les données JSON envoyées par le frontend
 
-// Port d'écoute
-const PORT = process.env.PORT || 3000
-// PORT : utilise la variable d'environnement ou 3000 par défaut
+// ============ ROUTES ============
+const snippetsRouter = require('./routes/snippets')
+// Importe le fichier de routes snippets
 
-// Route de test
+app.use('/snippets', snippetsRouter)
+// Utilise les routes snippets sur /snippets
+
+// ============ ROUTE DE TEST ============
 app.get('/', (req, res) => {
-    // Route GET sur / : répond quand on visite la page d'accueil
     res.json({ message: 'Bienvenue sur le serveur CodeGrimoire !' })
 })
 
-// Démarrage du serveur
+// ============ DÉMARRAGE ============
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
     console.log(`Serveur démarré sur le port ${PORT}`)
 })
