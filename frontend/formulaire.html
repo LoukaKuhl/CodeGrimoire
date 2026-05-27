@@ -1,128 +1,83 @@
 <!DOCTYPE html>
-<!-- Indique que c'est une page HTML5 -->
 <html lang="fr">
-<!-- lang="fr" : dit au navigateur que la page est en français -->
 
 <head>
     <meta charset="UTF-8">
-    <!-- UTF-8 : permet d'afficher les accents et caractères spéciaux -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Rend la page responsive sur mobile -->
     <title>CodeGrimoire - Nouveau snippet</title>
-    <!-- Titre affiché dans l'onglet du navigateur -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Charge Tailwind CSS depuis internet -->
 </head>
 
 <body class="bg-gray-950 text-white min-h-screen">
-<!-- bg-gray-950 : fond très sombre -->
-<!-- text-white : texte blanc par défaut -->
-<!-- min-h-screen : hauteur minimum = hauteur de l'écran -->
 
-    <!-- ============ BARRE DE NAVIGATION ============ -->
     <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-    <!-- bg-gray-900 : fond gris foncé -->
-    <!-- border-b border-gray-700 : bordure en bas -->
-    <!-- flex items-center justify-between : éléments aux deux extrémités -->
         <h1 class="text-xl font-bold text-purple-400">CodeGrimoire</h1>
-        <!-- text-purple-400 : titre en violet -->
         <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm">
-        <!-- a href : lien retour vers la page principale -->
-        <!-- hover:bg-gray-600 : fond plus clair au survol -->
             Retour
         </a>
     </nav>
 
-    <!-- ============ FORMULAIRE ============ -->
     <div class="max-w-3xl mx-auto p-6">
-    <!-- max-w-3xl : largeur maximum de 768px -->
-    <!-- mx-auto : centre horizontalement -->
-    <!-- p-6 : espacement intérieur de 24px -->
-
         <h2 class="text-2xl font-bold mb-6">Nouveau snippet</h2>
-        <!-- text-2xl : grande taille de texte -->
-        <!-- mb-6 : marge en bas -->
 
-        <form class="flex flex-col gap-4">
-        <!-- form : formulaire HTML -->
-        <!-- flex flex-col : empile les champs en colonne -->
-        <!-- gap-4 : espace de 16px entre les champs -->
+        <div class="flex flex-col gap-4">
 
-            <!-- ===== Champ titre ===== -->
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Titre</label>
-                <!-- label : étiquette du champ -->
-                <!-- block : affiche sur sa propre ligne -->
-                <!-- text-gray-400 : texte gris clair -->
                 <input 
+                    id="input-titre"
                     type="text" 
                     placeholder="Ex : Fonction de tri en JavaScript"
                     class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
                 >
-                <!-- type="text" : champ de saisie texte -->
-                <!-- w-full : prend toute la largeur -->
-                <!-- focus:border-purple-500 : bordure violette au clic -->
             </div>
 
-            <!-- ===== Champ langage ===== -->
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Langage</label>
-                <select class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500">
-                <!-- select : liste déroulante -->
-                <!-- w-full : prend toute la largeur -->
+                <select id="input-langage" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500">
                     <option value="">Choisir un langage</option>
-                    <!-- option : choix dans la liste -->
-                    <option value="javascript">JavaScript</option>
-                    <option value="python">Python</option>
-                    <option value="html">HTML</option>
-                    <option value="css">CSS</option>
-                    <option value="sql">SQL</option>
-                    <option value="php">PHP</option>
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="Python">Python</option>
+                    <option value="HTML">HTML</option>
+                    <option value="CSS">CSS</option>
+                    <option value="SQL">SQL</option>
+                    <option value="PHP">PHP</option>
                 </select>
             </div>
 
-            <!-- ===== Champ tags ===== -->
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Tags</label>
                 <input 
+                    id="input-tags"
                     type="text" 
                     placeholder="Ex : tri, tableau, algorithme"
                     class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
                 >
-                <!-- Séparés par des virgules, ex : tri, tableau -->
             </div>
 
-            <!-- ===== Champ code ===== -->
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Code</label>
                 <textarea 
+                    id="input-code"
                     rows="12"
                     placeholder="Colle ton code ici..."
                     class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 font-mono text-sm"
                 ></textarea>
-                <!-- textarea : zone de texte multi-lignes -->
-                <!-- rows="12" : hauteur de 12 lignes -->
-                <!-- font-mono : police monospace comme un éditeur de code -->
             </div>
 
-            <!-- ===== Boutons ===== -->
             <div class="flex gap-3 justify-end">
-            <!-- flex : boutons côte à côte -->
-            <!-- gap-3 : espace entre les boutons -->
-            <!-- justify-end : aligne les boutons à droite -->
                 <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
-                <!-- Bouton annuler : retour sans sauvegarder -->
                     Annuler
                 </a>
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
-                <!-- type="submit" : envoie le formulaire -->
-                <!-- bg-purple-600 : fond violet -->
+                <button onclick="sauvegarderSnippet()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
                     Sauvegarder
                 </button>
             </div>
 
-        </form>
+        </div>
     </div>
+
+    <script src="formulaire.js"></script>
 
 </body>
 </html>
