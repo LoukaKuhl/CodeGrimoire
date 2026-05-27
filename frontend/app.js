@@ -1,7 +1,6 @@
 // ============ URL DE L'API ============
 const API_URL = 'http://localhost:3000'
 
-// Variable qui stocke tous les snippets en mémoire
 let tousLesSnippets = []
 
 // ============ CHARGER LES SNIPPETS ============
@@ -41,15 +40,26 @@ function afficherDetail(id) {
     if (!snippet) return
 
     document.getElementById('detail-snippet').dataset.id = id
-
     document.querySelector('#detail-snippet h2').textContent = snippet.title
     document.querySelector('#detail-snippet pre').textContent = snippet.code
+}
+
+// ============ MODIFIER UN SNIPPET ============
+function modifierSnippet() {
+    const id = document.getElementById('detail-snippet').dataset.id
+
+    if (!id) {
+        alert('Sélectionne un snippet à modifier !')
+        return
+    }
+
+    window.location.href = `formulaire.html?id=${id}`
+    // Redirige vers le formulaire en passant l'id dans l'URL
 }
 
 // ============ SUPPRIMER UN SNIPPET ============
 async function supprimerSnippet() {
     const id = document.getElementById('detail-snippet').dataset.id
-    // dataset.id : récupère l'id mémorisé du snippet affiché
 
     if (!id) {
         alert('Sélectionne un snippet à supprimer !')
@@ -57,7 +67,6 @@ async function supprimerSnippet() {
     }
 
     if (!confirm('Supprimer ce snippet ?')) return
-    // confirm : affiche une boîte de dialogue Oui/Non
 
     try {
         const response = await fetch(`${API_URL}/snippets/${id}`, {
