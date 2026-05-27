@@ -10,7 +10,6 @@ async function chargerSnippets() {
         const response = await fetch(`${API_URL}/snippets`)
         const snippets = await response.json()
         tousLesSnippets = snippets
-        // On sauvegarde les snippets pour y accéder au clic
         afficherSnippets(snippets)
     } catch (erreur) {
         console.error('Erreur lors du chargement :', erreur)
@@ -39,12 +38,40 @@ function afficherSnippets(snippets) {
 // ============ AFFICHER LE DETAIL D'UN SNIPPET ============
 function afficherDetail(id) {
     const snippet = tousLesSnippets.find(s => s.id === id)
-    // .find() : cherche dans le tableau le snippet dont l'id correspond
-
     if (!snippet) return
+
+    document.getElementById('detail-snippet').dataset.id = id
 
     document.querySelector('#detail-snippet h2').textContent = snippet.title
     document.querySelector('#detail-snippet pre').textContent = snippet.code
+}
+
+// ============ SUPPRIMER UN SNIPPET ============
+async function supprimerSnippet() {
+    const id = document.getElementById('detail-snippet').dataset.id
+    // dataset.id : récupère l'id mémorisé du snippet affiché
+
+    if (!id) {
+        alert('Sélectionne un snippet à supprimer !')
+        return
+    }
+
+    if (!confirm('Supprimer ce snippet ?')) return
+    // confirm : affiche une boîte de dialogue Oui/Non
+
+    try {
+        const response = await fetch(`${API_URL}/snippets/${id}`, {
+            method: 'DELETE'
+        })
+
+        if (response.ok) {
+            document.querySelector('#detail-snippet h2').textContent = 'Titre du snippet'
+            document.querySelector('#detail-snippet pre').textContent = '// Ton code apparaîtra ici'
+            chargerSnippets()
+        }
+    } catch (erreur) {
+        console.error('Erreur :', erreur)
+    }
 }
 
 // ============ LANCEMENT AU CHARGEMENT DE LA PAGE ============
