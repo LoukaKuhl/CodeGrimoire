@@ -59,7 +59,6 @@ function afficherDetail(id) {
     document.querySelector('#detail-snippet h2').textContent = snippet.title
     document.querySelector('#detail-snippet pre').textContent = snippet.code
 
-    // Met à jour le badge de langage dans le détail
     const badge = document.getElementById('badge-langage')
     if (badge) {
         badge.textContent = snippet.language
@@ -80,6 +79,7 @@ function modifierSnippet() {
 // ============ SUPPRIMER UN SNIPPET ============
 async function supprimerSnippet() {
     const id = document.getElementById('detail-snippet').dataset.id
+
     if (!id) {
         alert('Sélectionne un snippet à supprimer !')
         return
@@ -91,8 +91,12 @@ async function supprimerSnippet() {
             method: 'DELETE'
         })
         if (response.ok) {
+            // Efface l'id mémorisé après suppression
+            delete document.getElementById('detail-snippet').dataset.id
             document.querySelector('#detail-snippet h2').textContent = 'Titre du snippet'
             document.querySelector('#detail-snippet pre').textContent = '// Ton code apparaîtra ici'
+            document.getElementById('badge-langage').textContent = 'Langage'
+            document.getElementById('badge-langage').className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-gray-700 text-white'
             chargerSnippets()
         }
     } catch (erreur) {
