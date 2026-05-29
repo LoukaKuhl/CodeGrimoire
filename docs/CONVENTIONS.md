@@ -1,6 +1,6 @@
 # CONVENTIONS — CodeGrimoire
 
-**Version :** 1.5
+**Version :** 2.0
 **Date :** 29 mai 2026
 **Statut :** Actif
 **Auteur :** Louka Kuhl — Agence418
@@ -45,18 +45,18 @@ Référence unique pour le développement de CodeGrimoire. En cas de doute, cons
 3. [Formatage](#3-formatage)
 4. [Commentaires](#4-commentaires)
 5. [JavaScript — syntaxe](#5-javascript--syntaxe)
-6. [JavaScript — paradigmes](#6-javascript--paradigmes)
-7. [HTML](#7-html)
-8. [Tailwind CSS](#8-tailwind-css)
-9. [Backend Node.js](#9-backend-nodejs)
-10. [Base de données](#10-base-de-données)
-11. [Gestion des erreurs](#11-gestion-des-erreurs)
-12. [Sécurité et environnements](#12-sécurité-et-environnements)
-13. [Git](#13-git)
-14. [Structure du projet](#14-structure-du-projet)
-15. [Interfaces](#15-interfaces)
-16. [ESLint](#16-eslint)
-17. [Changelog](#17-changelog)
+7. [JavaScript — paradigmes](#7-javascript--paradigmes)
+8. [HTML](#8-html)
+9. [Tailwind CSS](#9-tailwind-css)
+10. [Backend Node.js](#10-backend-nodejs)
+11. [Base de données](#11-base-de-données)
+12. [Gestion des erreurs](#12-gestion-des-erreurs)
+13. [Sécurité et environnements](#13-sécurité-et-environnements)
+14. [Git](#14-git)
+15. [Structure du projet](#15-structure-du-projet)
+16. [Interfaces](#16-interfaces)
+17. [ESLint](#17-eslint)
+18. [Changelog](#18-changelog)
 
 ---
 
@@ -341,7 +341,258 @@ for (let i = 0; i < snippets.length; i++) {
 
 ---
 
-## 6. JavaScript — paradigmes
+## 6. JavaScript — syntaxe avancée
+
+### Optional chaining `?.`
+
+Autorisé pour accéder à une propriété qui pourrait être `null` ou `undefined`.
+
+```javascript
+// ✅
+const language = snippet?.language
+const badge = badgeColors?.[language]
+
+// ❌ — vérification manuelle inutile
+const language = snippet ? snippet.language : undefined
+```
+
+### Nullish coalescing `??`
+
+`??` pour les valeurs par défaut. `||` interdit pour cet usage.
+→ `||` considère `0` et `''` comme faux. `??` uniquement `null` et `undefined`.
+
+```javascript
+// ✅
+const port = process.env.PORT ?? 3000
+const language = snippet.language ?? 'Autre'
+
+// ❌
+const port = process.env.PORT || 3000
+```
+
+### Ternaire
+
+Autorisé sur une seule ligne pour les cas simples. Imbrication interdite.
+
+```javascript
+// ✅ — simple et lisible
+const badge = badgeColors[language] ?? 'bg-gray-500 text-white'
+const label = isLoading ? 'Chargement...' : 'Sauvegarder'
+
+// ❌ — ternaire imbriqué illisible
+const label = isLoading ? 'Chargement...' : hasError ? 'Erreur' : 'OK'
+```
+
+### Paramètres par défaut
+
+Paramètres par défaut dans la signature de fonction. Vérification manuelle interdite.
+
+```javascript
+// ✅
+function getBadge(language = 'Autre') {
+    return badgeColors[language] ?? 'bg-gray-500 text-white'
+}
+
+// ❌
+function getBadge(language) {
+    const lang = language || 'Autre'
+    return badgeColors[lang]
+}
+```
+
+### `forEach` vs `for...of`
+
+`forEach` pour les effets de bord sur les tableaux. `for...of` pour les itérables non-tableaux. Boucles `for` classiques interdites.
+
+```javascript
+// ✅ — effet de bord sur tableau
+snippets.forEach(s => console.error(s.title))
+
+// ✅ — itérable non-tableau
+for (const [key, value] of Object.entries(badgeColors)) { ... }
+
+// ❌ — boucle classique
+for (let i = 0; i < snippets.length; i++) { ... }
+```
+
+### `reduce`
+
+`reduce` autorisé uniquement si `map` + `filter` ne suffisent pas. Toujours avec une valeur initiale.
+
+```javascript
+// ✅ — cas où reduce est justifié
+const parLanguage = snippets.reduce((acc, s) => {
+    acc[s.language] = (acc[s.language] ?? 0) + 1
+    return acc
+}, {})
+
+// ❌ — reduce quand map suffit
+const titres = snippets.reduce((acc, s) => [...acc, s.title], [])
+// → utiliser snippets.map(s => s.title) à la place
+```
+
+### Supabase : colonnes explicites vs `select('*')`
+
+`select('*')` autorisé pendant le développement. En production (S5), préférer les colonnes explicites.
+
+```javascript
+// ✅ Développement
+await supabase.from('snippets').select('*')
+
+// ✅ Production (S5)
+await supabase.from('snippets').select('id, title, language, tags, created_at')
+```
+
+### Validation : où et comment
+
+Validation côté frontend obligatoire avant tout appel API. Validation côté backend recommandée à partir de S4.
+
+| Couche | Validation | Quand |
+|--------|-----------|-------|
+| Frontend | Vérification manuelle (`if (!title)`) | Maintenant |
+| Backend | Vérification dans la route | S4 |
+
+```javascript
+// ✅ Frontend — validation manuelle actuelle
+if (!title || !language || !code) {
+    alert('Merci de remplir le titre, le langage et le code !')
+    return
+}
+
+// ✅ Backend — à ajouter en S4
+if (!title || !language || !code) {
+    throw new ValidationError('Titre, code et langage sont obligatoires')
+}
+```
+
+### Shorthand object
+
+Toujours utiliser le shorthand quand la clé et la variable ont le même nom.
+
+```javascript
+// ✅
+const snippet = { title, code, language, tags }
+res.json({ data, error })
+
+// ❌
+const snippet = { title: title, code: code, language: language }
+res.json({ data: data, error: error })
+```
+
+### Spread `...`
+
+`...` pour copier ou fusionner des objets et tableaux. `Object.assign` interdit.
+
+```javascript
+// ✅ — copie d'objet
+const updated = { ...snippet, title: 'Nouveau titre' }
+
+// ✅ — copie de tableau
+const newSnippets = [...tousLesSnippets, nouveauSnippet]
+
+// ❌
+const updated = Object.assign({}, snippet, { title: 'Nouveau titre' })
+```
+
+### `await` séquentiel vs `Promise.all`
+
+`await` séquentiel par défaut. `Promise.all` uniquement si les requêtes sont indépendantes et doivent tourner en parallèle.
+
+```javascript
+// ✅ — séquentiel (une requête dépend de l'autre)
+const { data: snippet } = await supabase.from('snippets').select('*').eq('id', id)
+const { data: user } = await supabase.from('users').select('*').eq('id', snippet.user_id)
+
+// ✅ — parallèle (requêtes indépendantes)
+const [snippets, users] = await Promise.all([
+    supabase.from('snippets').select('*'),
+    supabase.from('users').select('*')
+])
+
+// ❌ — séquentiel quand les requêtes sont indépendantes (inutilement lent)
+const { data: snippets } = await supabase.from('snippets').select('*')
+const { data: users } = await supabase.from('users').select('*')
+```
+
+### Ordre des imports dans `server.js` et les routes
+
+```javascript
+// 1. Modules natifs Node.js
+const path = require('path')
+
+// 2. Modules externes (npm)
+const express = require('express')
+const cors = require('cors')
+
+// 3. Modules internes (fichiers du projet)
+const { supabase } = require('./supabase')
+const snippetsRouter = require('./routes/snippets')
+```
+
+### `module.exports`
+
+`module.exports = valeur` pour exporter une seule chose. `module.exports = { a, b }` pour exporter plusieurs choses.
+
+```javascript
+// ✅ — export unique
+module.exports = router
+
+// ✅ — exports multiples
+module.exports = { supabase }
+
+// ❌ — exports.x interdit
+exports.supabase = supabase
+```
+
+### Chaînage de méthodes
+
+Autorisé jusqu'à 3 méthodes chainées. Au-delà, découper en variables intermédiaires.
+
+```javascript
+// ✅ — 2 méthodes, lisible
+const html = snippets.map(s => `<div>${s.title}</div>`).join('')
+
+// ✅ — 3 méthodes max
+const jsSnippets = snippets
+    .filter(s => s.language === 'JavaScript')
+    .map(s => s.title)
+    .join(', ')
+
+// ❌ — trop long, découper
+const result = snippets.filter(...).map(...).reduce(...).sort(...).join(...)
+```
+
+### Nombres magiques
+
+Les nombres magiques sont interdits. Toute valeur répétée ou non évidente est extraite en constante.
+
+```javascript
+// ✅
+const PORT = 3000
+const HTTP_NOT_FOUND = 404
+const HTTP_BAD_REQUEST = 400
+
+// ❌
+app.listen(3000, ...)
+res.status(404).json(...)
+```
+
+### `localStorage` et `sessionStorage`
+
+Interdits jusqu'en S4. L'authentification Supabase gère la session.
+À partir de S4 : uniquement pour les préférences UI (thème, etc.), jamais pour les données sensibles.
+
+```javascript
+// ❌ — avant S4
+localStorage.setItem('user', JSON.stringify(user))
+
+// ✅ — S4 : Supabase Auth gère la session
+const { data: { session } } = await supabase.auth.getSession()
+```
+
+---
+
+## 7. JavaScript — paradigmes
 
 ### Paradigme général
 
@@ -410,7 +661,7 @@ let tousLesSnippets = []
 
 ---
 
-## 7. HTML
+## 8. HTML
 
 ### Structure obligatoire
 
@@ -485,9 +736,171 @@ document.querySelector('#liste-snippets')
 
 Règles : 4 espaces · balises fermées · `<script>` avant `</body>`.
 
+### `classList` vs `className`
+
+`classList` pour ajouter ou retirer des classes dynamiquement. `className` pour remplacer toutes les classes d'un coup.
+
+```javascript
+// ✅ — ajouter/retirer une classe
+element.classList.add('bg-purple-600')
+element.classList.remove('bg-gray-700')
+element.classList.toggle('hidden')
+
+// ✅ — remplacer toutes les classes (badges)
+badge.className = `text-xs px-2 py-0.5 rounded-full ${getBadge(language)}`
+
+// ❌ — className pour ajouter une seule classe
+element.className = element.className + ' bg-purple-600'
+```
+
+### Self-closing tags
+
+Pas de self-closing sur les balises HTML5 void. `<input>` et non `<input />`.
+
+```html
+<!-- ✅ -->
+<input id="input-titre" type="text">
+<meta charset="UTF-8">
+<br>
+
+<!-- ❌ -->
+<input id="input-titre" type="text" />
+<meta charset="UTF-8" />
+```
+
+### Attributs booléens
+
+Attributs booléens sans valeur. Pas de `="true"` ou `="false"`.
+
+```html
+<!-- ✅ -->
+<button disabled>Sauvegarder</button>
+<input required type="text">
+
+<!-- ❌ -->
+<button disabled="true">Sauvegarder</button>
+<input required="required" type="text">
+```
+
+### Accessibilité `aria-*`
+
+`aria-label` obligatoire sur les boutons sans texte visible. `role` sur les éléments interactifs non-sémantiques.
+
+```html
+<!-- ✅ -->
+<button onclick="supprimerSnippet()" aria-label="Supprimer le snippet">
+    🗑
+</button>
+<div role="list" id="liste-snippets">
+<div role="listitem" onclick="afficherDetail(${s.id})">
+
+<!-- ❌ -->
+<button onclick="supprimerSnippet()">🗑</button>
+```
+
+### Mutation des paramètres de fonction
+
+Interdite. Ne jamais modifier un paramètre reçu — créer une copie.
+
+```javascript
+// ✅
+function formaterSnippet(snippet) {
+    return { ...snippet, title: snippet.title.trim() }
+}
+
+// ❌
+function formaterSnippet(snippet) {
+    snippet.title = snippet.title.trim()
+    return snippet
+}
+```
+
+### `dataset` vs autre mécanisme de mémorisation
+
+`dataset` pour mémoriser une valeur sur un élément DOM. Jamais de variable globale dédiée pour ça.
+
+```javascript
+// ✅ — dataset pour mémoriser l'id actif
+document.getElementById('detail-snippet').dataset.id = id
+const id = document.getElementById('detail-snippet').dataset.id
+delete document.getElementById('detail-snippet').dataset.id
+
+// ❌ — variable globale dédiée
+let snippetActifId = null
+```
+
+### Navigation
+
+`window.location.href` pour toutes les redirections. History API interdite.
+
+```javascript
+// ✅
+window.location.href = 'index.html'
+window.location.href = `formulaire.html?id=${id}`
+
+// ❌
+history.pushState({}, '', '/formulaire')
+```
+
+### Délégation d'événements
+
+Délégation d'événements sur le conteneur parent quand les éléments sont générés dynamiquement.
+
+```javascript
+// ✅ — délégation sur le conteneur
+document.getElementById('liste-snippets').addEventListener('click', (e) => {
+    const item = e.target.closest('[data-id]')
+    if (item) afficherDetail(Number(item.dataset.id))
+})
+
+// ❌ — listener sur chaque élément généré
+snippets.forEach(s => {
+    document.getElementById(`snippet-${s.id}`)
+        .addEventListener('click', () => afficherDetail(s.id))
+})
+```
+
+### Balises sémantiques
+
+Utiliser les balises sémantiques HTML5. `<div>` uniquement quand aucune balise sémantique ne convient.
+
+| Balise | Usage |
+|--------|-------|
+| `<nav>` | Barre de navigation |
+| `<main>` | Contenu principal |
+| `<aside>` | Sidebar |
+| `<section>` | Section de contenu groupé |
+| `<header>` | En-tête de page ou section |
+| `<footer>` | Pied de page |
+
+```html
+<!-- ✅ -->
+<nav class="bg-gray-900 px-6 py-4">
+<aside class="w-80 bg-gray-900">
+<main class="flex-1 bg-gray-950 p-6">
+
+<!-- ❌ -->
+<div class="bg-gray-900 px-6 py-4">
+<div class="w-80 bg-gray-900">
+```
+
+### Accessibilité
+
+Chaque `<input>` doit avoir un `<label>` associé.
+
+```html
+<!-- ✅ -->
+<label for="input-titre" class="text-sm text-gray-400">Titre</label>
+<input id="input-titre" type="text" placeholder="...">
+
+<!-- ❌ -->
+<input id="input-titre" type="text" placeholder="Titre...">
+```
+
+
 ---
 
-## 8. Tailwind CSS
+## 9. Tailwind CSS
 
 Tailwind en priorité. `style=""` interdit. `style.css` réservé aux exceptions.
 
@@ -524,9 +937,66 @@ layout → spacing → sizing → colors → typography → borders → interact
 | PHP | `bg-indigo-500 text-white` |
 | Autre | `bg-gray-500 text-white` |
 
+### Valeurs arbitraires `[...]`
+
+Interdites. Utiliser uniquement les valeurs prédéfinies de la palette du projet.
+
+```html
+<!-- ✅ -->
+<div class="bg-gray-950 text-white">
+
+<!-- ❌ -->
+<div class="bg-[#0a0a0f] text-[#ffffff]">
+```
+
+### `@apply` dans `style.css`
+
+Interdit. Si une combinaison de classes se répète, la documenter dans les conventions plutôt que l'extraire avec `@apply`.
+
+```css
+/* ❌ */
+.btn-primary {
+    @apply bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700;
+}
+```
+
+### Mobile-first et breakpoints
+
+Le projet est une application de bureau (pas de responsive prévu). Les breakpoints Tailwind (`sm:`, `md:`, `lg:`) sont interdits sauf décision explicite en S5.
+
+```html
+<!-- ❌ — responsive non prévu -->
+<div class="w-full md:w-80 lg:w-96">
+
+<!-- ✅ — taille fixe assumée -->
+<aside class="w-80 bg-gray-900">
+```
+
+### Duplication de classes
+
+Quand un groupe de classes se répète plus de 3 fois, le documenter dans les conventions (section 8) plutôt que d'utiliser `@apply`.
+
+```html
+<!-- Si ce pattern apparaît 3+ fois, l'ajouter au tableau de la palette -->
+<span class="text-xs px-2 py-0.5 rounded-full font-medium">
+```
+
+### Mode sombre `dark:`
+
+Le projet utilise un thème sombre fixe (`bg-gray-950`). La variante `dark:` Tailwind est interdite jusqu'en S5.
+En S5, la stratégie sera : `class` sur `<html>` (pas `media`).
+
+```html
+<!-- ❌ — avant S5 -->
+<div class="bg-white dark:bg-gray-950">
+
+<!-- ✅ — thème sombre fixe actuel -->
+<div class="bg-gray-950">
+```
+
 ---
 
-## 9. Backend Node.js
+## 10. Backend Node.js
 
 ### Structure de `server.js`
 
@@ -592,6 +1062,50 @@ router.get('/', async (req, res) => {
 })
 ```
 
+
+### Architecture des couches
+
+Tout le code métier est dans `routes/`. Pas de séparation controllers/services pour ce projet.
+→ Justification : durée du stage (5 semaines) — la séparation en couches sera introduite si le projet évolue.
+
+```
+routes/snippets.js   ← validation + logique + appel Supabase
+```
+
+### Validation des variables d'environnement
+
+Les variables d'environnement critiques sont vérifiées au démarrage du serveur.
+
+```javascript
+// ============ VALIDATION ENV ============
+const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY']
+REQUIRED_ENV.forEach(key => {
+    if (!process.env[key]) {
+        console.error(`Variable d'environnement manquante : ${key}`)
+        process.exit(1)
+        // process.exit(1) : arrête le serveur si une clé est manquante
+    }
+})
+```
+
+### Middleware d'erreur centralisé
+
+`try/catch` dans chaque route. Pas de middleware d'erreur Express centralisé.
+→ Justification : simplicité et lisibilité pour ce niveau de projet.
+
+```javascript
+// ✅ — try/catch par route (choix assumé)
+router.get('/', async (req, res) => {
+    try { ... }
+    catch (error) {
+        res.status(error.statusCode || 500).json({ type: error.name, message: error.message })
+    }
+})
+
+// ❌ — middleware centralisé (trop avancé pour ce projet)
+app.use((err, req, res, next) => { ... })
+```
+
 ### Format des réponses
 
 | Cas | Format |
@@ -620,7 +1134,7 @@ router.get('/', async (req, res) => {
 
 ---
 
-## 10. Base de données
+## 11. Base de données
 
 ### Table `snippets`
 
@@ -651,9 +1165,66 @@ await supabase.from('snippets').update({ title, code, language, tags }).eq('id',
 await supabase.from('snippets').delete().eq('id', id)
 ```
 
+### Migrations
+
+Les modifications de schéma sont documentées dans `docs/migrations/` sous forme de fichiers SQL numérotés. Pas de modification directe depuis le dashboard Supabase sans fichier SQL correspondant.
+
+```
+docs/
+└── migrations/
+    ├── 001_create_snippets.sql
+    ├── 002_add_user_id.sql      ← S4
+    └── 003_add_rls.sql          ← S4
+```
+
+### Pagination
+
+`.range()` Supabase pour paginer les résultats quand la liste dépasse 50 éléments.
+
+```javascript
+// ✅ — pagination
+const { data } = await supabase
+    .from('snippets')
+    .select('*')
+    .range(0, 19) // 20 résultats par page
+
+// Actuel — pas de pagination nécessaire pour le moment
+await supabase.from('snippets').select('*')
+```
+
 ---
 
-## 11. Gestion des erreurs
+## 12. Gestion des erreurs
+
+
+### Classes d'erreur personnalisées
+
+Deux classes d'erreur custom pour distinguer les types d'erreurs dans les routes.
+
+```javascript
+class ValidationError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'ValidationError'
+        this.statusCode = 400
+    }
+}
+
+class NotFoundError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'NotFoundError'
+        this.statusCode = 404
+    }
+}
+```
+
+Usage dans les routes :
+
+```javascript
+if (!title || !code) throw new ValidationError('Titre et code obligatoires')
+if (!data.length) throw new NotFoundError(`Snippet ${id} introuvable`)
+```
 
 - Toutes les fonctions `async` utilisent `try/catch`.
 - Erreurs loggées avec `console.error()`, jamais `console.log()`.
@@ -681,7 +1252,7 @@ async function sauvegarderSnippet() {
 
 ---
 
-## 12. Sécurité et environnements
+## 13. Sécurité et environnements
 
 ### Variables d'environnement
 
@@ -728,7 +1299,7 @@ const API_URL = process.env.API_URL || 'http://localhost:3000'
 
 ---
 
-## 13. Git
+## 14. Git
 
 ### Format des commits
 
@@ -760,6 +1331,20 @@ Première lettre en majuscule. Pas de point final. Maximum 72 caractères.
 
 Règles : ne jamais travailler sur `main` · merger uniquement après tests.
 
+### Commits atomiques
+
+Un commit = un changement logique. Ne pas mélanger plusieurs fonctionnalités dans un même commit.
+
+```
+// ✅ — atomique
+feat : Bouton Supprimer fonctionnel
+fix : Correction bug modifier sans sélection
+
+// ❌ — trop de changements mélangés
+feat : Supprimer + modifier + badges + fix bug
+```
+
+
 ### Historique du projet
 
 ```
@@ -775,7 +1360,17 @@ docs : CONVENTIONS v1.5 — paradigmes et syntaxe complets
 
 ---
 
-## 14. Structure du projet
+
+### Fichier de constantes partagées
+
+Les constantes utilisées à la fois dans le frontend et les conventions (langages, couleurs de badges) sont définies dans un seul endroit : `app.js` côté frontend. Toute modification doit être répercutée dans les deux endroits.
+
+| Constante | Définie dans | Référencée dans |
+|-----------|-------------|-----------------|
+| `badgeColors` | `app.js` | Section 9 CONVENTIONS.md |
+| `API_URL` | `app.js`, `formulaire.js` | Section 13 CONVENTIONS.md |
+
+## 15. Structure du projet
 
 ```
 CodeGrimoire/
@@ -802,7 +1397,34 @@ CodeGrimoire/
 
 ---
 
-## 15. Interfaces
+
+### Tests
+
+Pas de tests automatisés pendant le stage (5 semaines). Le type de commit `test` est réservé aux tests manuels documentés.
+En production, le framework recommandé serait **Vitest** pour Node.js.
+
+```
+// ✅ — commit test = test manuel documenté
+test : Vérification CRUD complet sur navigateur
+test : Tests des cas limites formulaire vide
+```
+
+### JSDoc sur les fonctions
+
+`@param` et `@returns` sur toutes les fonctions utilitaires. Optionnel sur les fonctions d'affichage et d'action.
+
+```javascript
+/**
+ * Retourne les classes Tailwind du badge selon le langage.
+ * @param {string} language - Langage de programmation
+ * @returns {string} Classes Tailwind du badge
+ */
+function getBadge(language) {
+    return badgeColors[language] || 'bg-gray-500 text-white'
+}
+```
+
+## 16. Interfaces
 
 Le projet est en JavaScript vanilla. Les interfaces sont documentées en JSDoc et anticipent une migration TypeScript.
 
@@ -857,7 +1479,34 @@ type Langage = 'JavaScript' | 'Python' | 'HTML' | 'CSS' | 'SQL' | 'PHP'
 
 ---
 
-## 16. ESLint
+
+## .editorconfig
+
+Fichier `.editorconfig` à la racine du projet pour imposer l'indentation et l'encodage à tous les éditeurs.
+
+```ini
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.json]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+```
+
+→ Installe l'extension **EditorConfig for VS Code** (`editorconfig.editorconfig`) pour l'appliquer automatiquement.
+
+---
+
+## 17. ESLint
 
 ```bash
 npm install --save-dev eslint
@@ -892,6 +1541,24 @@ Fichier `.eslintrc.json` :
 }
 ```
 
+
+### Prettier
+
+Prettier n'est pas installé dans ce projet. ESLint seul gère le formatage.
+→ Risque : ESLint ne corrige pas l'indentation et les guillemets aussi finement que Prettier.
+→ Compensation : l'extension Prettier de VS Code est recommandée pour le formatage automatique à la sauvegarde.
+
+Configurer VS Code (`settings.json`) :
+```json
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.singleQuote": true,
+    "prettier.semi": false,
+    "prettier.tabWidth": 4
+}
+```
+
 | Règle | Niveau | Pourquoi |
 |-------|--------|----------|
 | `no-var` | error | Portée de fonction = bugs silencieux |
@@ -902,7 +1569,7 @@ Fichier `.eslintrc.json` :
 
 ---
 
-## 17. Changelog
+## 18. Changelog
 
 | Version | Date | Modifications |
 |---------|------|---------------|
@@ -912,6 +1579,11 @@ Fichier `.eslintrc.json` :
 | 1.3 | 29/05/2026 | Décisions d'architecture, Pourquoi, Types/Interfaces, Classes d'erreurs |
 | 1.4 | 29/05/2026 | Version allégée, interface par défaut |
 | 1.5 | 29/05/2026 | Retour Benoît Pascal : paradigmes explicites, function vs arrow, modules, DOM, event handlers, guard clauses, immutabilité, format réponses, nommage mixte justifié |
+| 1.6 | 29/05/2026 | Syntaxe avancée : optional chaining, nullish coalescing, ternaire, paramètres par défaut, forEach vs for...of, reduce, select Supabase, validation front/back |
+| 1.7 | 29/05/2026 | Shorthand object, spread, Promise.all, ordre des imports, module.exports |
+| 1.8 | 29/05/2026 | Chaînage, nombres magiques, localStorage, balises sémantiques, accessibilité, Tailwind arbitraire, @apply, Prettier vs ESLint |
+| 1.9 | 29/05/2026 | dataset, window.location.href, délégation d'événements, migrations BDD, pagination Supabase, .editorconfig |
+| 2.0 | 29/05/2026 | classList, self-closing, aria-*, booléens HTML, mutation paramètres, mobile-first, dark:, duplication Tailwind, couches backend, validation env, middleware, classes d'erreur, commits atomiques, constantes partagées, tests, JSDoc |
 
 ---
 
