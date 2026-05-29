@@ -1,6 +1,6 @@
 # CONVENTIONS — CodeGrimoire
 
-**Version :** 1.4
+**Version :** 1.5
 **Date :** 29 mai 2026
 **Statut :** Actif
 **Auteur :** Louka Kuhl — Agence418
@@ -14,7 +14,7 @@
 
 ## Comment utiliser ce document
 
-Référence unique pour le développement de CodeGrimoire. En cas de doute, consulter ce document avant d'écrire du code. Lancer `npm run lint` avant chaque commit.
+Référence unique pour le développement de CodeGrimoire. En cas de doute, consulter ce document avant d'écrire du code. Lancer `npm run lint` avant chaque commit. Les règles marquées **[à trancher]** sont documentées mais pas encore finalisées — elles le seront au fur et à mesure du projet.
 
 ---
 
@@ -22,11 +22,19 @@ Référence unique pour le développement de CodeGrimoire. En cas de doute, cons
 
 | Décision | Choix | Pourquoi |
 |----------|-------|----------|
-| Frontend | HTML + Tailwind + JS vanilla | Durée du stage (5 semaines) — React aurait réduit le temps disponible |
+| Frontend | HTML + Tailwind + JS vanilla | 5 semaines de stage — React aurait réduit le temps fonctionnel |
 | Backend | Node.js + Express | Même langage front et back, courbe d'apprentissage réduite |
 | Base de données | Supabase (PostgreSQL) | Hébergement gratuit, API REST intégrée, dashboard visuel |
 | Déploiement | Vercel | Intégration GitHub native, gratuit, zero-config Node.js |
 | CSS | Tailwind | Pas de fichier CSS à maintenir, classes utilitaires dans le HTML |
+| Paradigme | Procédural | Fonctions + objets de configuration — pas de classes |
+| Modules backend | CommonJS | `require` / `module.exports` — pas de `"type": "module"` dans `package.json` |
+| Modules frontend | Scripts classiques | `<script src>` + variables globales — pas d'`import/export` |
+| Déclaration de fonction | `function` pour les nommées, `=>` pour les callbacks | Lisibilité et cohérence avec les exemples du projet |
+| Rendu DOM | `innerHTML` pour les listes, `textContent` pour les valeurs unitaires | Simplicité — risque XSS limité, projet privé, choix assumé |
+| Event handlers | `onclick` inline | Cohérence avec l'architecture sans modules |
+| Retour utilisateur | `alert()` | Choix assumé — pas de composant toast dans ce projet |
+| Nommage des fonctions | Verbes français + termes techniques anglais | Lisibilité en contexte francophone (`chargerSnippets`, `afficherDetail`) |
 
 ---
 
@@ -36,29 +44,30 @@ Référence unique pour le développement de CodeGrimoire. En cas de doute, cons
 2. [Nommage](#2-nommage)
 3. [Formatage](#3-formatage)
 4. [Commentaires](#4-commentaires)
-5. [JavaScript](#5-javascript)
-6. [HTML](#6-html)
-7. [Tailwind CSS](#7-tailwind-css)
-8. [Backend Node.js](#8-backend-nodejs)
-9. [Base de données](#9-base-de-données)
-10. [Gestion des erreurs](#10-gestion-des-erreurs)
-11. [Sécurité](#11-sécurité)
-12. [Git](#12-git)
-13. [Structure du projet](#13-structure-du-projet)
-14. [Interfaces](#14-interfaces)
-15. [ESLint](#15-eslint)
-16. [Changelog](#16-changelog)
+5. [JavaScript — syntaxe](#5-javascript--syntaxe)
+6. [JavaScript — paradigmes](#6-javascript--paradigmes)
+7. [HTML](#7-html)
+8. [Tailwind CSS](#8-tailwind-css)
+9. [Backend Node.js](#9-backend-nodejs)
+10. [Base de données](#10-base-de-données)
+11. [Gestion des erreurs](#11-gestion-des-erreurs)
+12. [Sécurité et environnements](#12-sécurité-et-environnements)
+13. [Git](#13-git)
+14. [Structure du projet](#14-structure-du-projet)
+15. [Interfaces](#15-interfaces)
+16. [ESLint](#16-eslint)
+17. [Changelog](#17-changelog)
 
 ---
 
 ## 1. Principes
 
 1. **Lisibilité** — le code est écrit pour être lu par un humain.
-2. **Responsabilité unique** — une fonction fait une seule chose.
+2. **Responsabilité unique** — une fonction fait une seule chose. Si tu dois écrire "et" pour la décrire, découpe-la.
 3. **Cohérence** — les mêmes règles s'appliquent partout, sans exception.
-4. **Français** — commentaires, messages et commits en français.
-
-Pas de code commenté laissé dans les fichiers. Pas de `console.log` de débogage oublié.
+4. **Français** — commentaires, messages utilisateur et commits en français. Noms de fonctions : verbes français + termes techniques anglais (`chargerSnippets`, `afficherDetail`). Choix assumé, documenté ici pour éviter les hésitations.
+5. **Procédural** — pas de classes, pas de POO. Fonctions nommées + objets de configuration uniquement.
+6. **Pas de code mort** — supprimer tout code commenté ou variable inutilisée avant de commiter.
 
 ---
 
@@ -69,30 +78,29 @@ Pas de code commenté laissé dans les fichiers. Pas de `console.log` de déboga
 | Contexte | Convention | Exemple | Pourquoi |
 |----------|-----------|---------|----------|
 | Variable | camelCase | `tousLesSnippets`, `snippetId` | Cohérence avec les API JS natives |
-| Fonction | camelCase | `chargerSnippets()`, `afficherDetail()` | Standard JS universel |
+| Fonction nommée | camelCase | `chargerSnippets()`, `afficherDetail()` | Standard JS universel |
 | Fonction async | camelCase | `async function supprimerSnippet()` | Idem |
 | Constante globale | SCREAMING_SNAKE_CASE | `API_URL` | Signale qu'elle ne change jamais |
 | Booléen | `is` / `has` + camelCase | `isLoading`, `hasError` | Rend le `if` lisible comme une phrase |
 | Tableau | pluriel | `snippets`, `tousLesSnippets` | Indique que c'est une liste |
+| Handler d'événement | `handle` + action | `handleClick`, `handleSubmit` | Distingue les handlers des autres fonctions |
 
-```javascript
-// ✅
-const API_URL = 'http://localhost:3000'
-let tousLesSnippets = []
-async function chargerSnippets() {}
+### Abréviations autorisées
 
-// ❌
-const apiurl = 'http://localhost:3000'
-let tous_les_snippets = []
-async function ChargerSnippets() {}
-```
+| Abréviation | Contexte |
+|-------------|----------|
+| `req`, `res` | Paramètres Express uniquement |
+| `s` | Callbacks courts sur snippets (`s => s.id === id`) |
+| `err` | Paramètre de catch |
+
+Toute autre abréviation est interdite.
 
 ### Attributs HTML
 
 | Attribut | Convention | Exemples |
 |----------|-----------|---------|
 | `id` | kebab-case | `liste-snippets`, `detail-snippet`, `badge-langage`, `input-titre` |
-| `class` | classes Tailwind | voir section 7 |
+| `class` | classes Tailwind | voir section 8 |
 
 ### Fichiers
 
@@ -119,12 +127,13 @@ Chaque table contient `id` (clé primaire) et `created_at` (horodatage automatiq
 | Indentation | 4 espaces | Les tabulations s'affichent différemment selon les éditeurs |
 | Longueur de ligne | 100 caractères max | Au-delà, illisible sans scroll horizontal |
 | Points-virgules | Omis | Style cohérent — ESLint enforce la règle |
-| Guillemets JS | Apostrophes ou backticks | Ne pas mélanger les styles |
+| Guillemets JS | Apostrophes `'...'` ou backticks | Ne pas mélanger les styles |
 | Guillemets HTML/JSON | Doubles `"..."` | Standard HTML5 et JSON |
 
 ```javascript
 // ✅
 const response = await fetch(`${API_URL}/snippets`)
+const snippets = await response.json()
 
 // ❌
 const response = await fetch(`${API_URL}/snippets`);
@@ -187,7 +196,7 @@ const response = await fetch(`${API_URL}/snippets`);
 
 ### Commentaires de code
 
-Chaque ligne non triviale est commentée sur la ligne suivante, en français.
+Chaque ligne non triviale est commentée sur la ligne suivante, en français. Règle adaptée au contexte de stage — allégement progressif prévu.
 
 ```javascript
 const response = await fetch(`${API_URL}/snippets`)
@@ -202,12 +211,12 @@ delete document.getElementById('detail-snippet').dataset.id
 
 ---
 
-## 5. JavaScript
+## 5. JavaScript — syntaxe
 
-### Déclarations
+### Déclarations de variables
 
 `const` par défaut. `let` si réassignation. `var` interdit.
-→ `var` a une portée de fonction, source de bugs difficiles à tracer.
+→ `var` a une portée de fonction, source de bugs silencieux.
 
 ```javascript
 // ✅
@@ -216,6 +225,23 @@ let tousLesSnippets = []
 
 // ❌
 var API_URL = 'http://localhost:3000'
+```
+
+### Déclaration de fonctions
+
+`function` pour les fonctions nommées. Arrow `=>` pour les callbacks et anonymes.
+
+```javascript
+// ✅ — fonction nommée
+async function chargerSnippets() { ... }
+function afficherSnippets(snippets) { ... }
+
+// ✅ — callback court
+snippets.map(s => `<div>${s.title}</div>`)
+tousLesSnippets.find(s => s.id === id)
+
+// ❌ — arrow pour une fonction nommée
+const chargerSnippets = async () => { ... }
 ```
 
 ### Async/Await
@@ -266,21 +292,125 @@ const title = req.body.title
 const id = req.params.id
 ```
 
-### Ordre des sections dans un fichier
+### Template literals
 
+Template literals obligatoires pour toute concaténation de chaîne.
+
+```javascript
+// ✅
+const url = `${API_URL}/snippets/${id}`
+liste.innerHTML = snippets.map(s => `<div>${s.title}</div>`).join('')
+
+// ❌
+const url = API_URL + '/snippets/' + id
 ```
-1. Variables globales et constantes     →  API_URL, tousLesSnippets
-2. Objets de configuration              →  badgeColors
-3. Fonctions utilitaires                →  getBadge()
-4. Fonctions de chargement              →  chargerSnippets()
-5. Fonctions d'affichage                →  afficherSnippets(), afficherDetail()
-6. Fonctions d'action                   →  modifierSnippet(), supprimerSnippet()
-7. Lancement                            →  chargerSnippets()
+
+### Retour anticipé (guard clause)
+
+Retourner tôt plutôt qu'imbriquer.
+
+```javascript
+// ✅
+if (!id) {
+    alert('Sélectionne un snippet !')
+    return
+}
+// suite du code...
+
+// ❌
+if (id) {
+    // code imbriqué sur 30 lignes
+}
+```
+
+### Méthodes de tableau
+
+`map`, `filter`, `find` pour les transformations. `forEach` pour les effets de bord.
+
+```javascript
+// ✅
+const html = snippets.map(s => `<div>${s.title}</div>`).join('')
+const jsSnippets = snippets.filter(s => s.language === 'JavaScript')
+const snippet = snippets.find(s => s.id === id)
+
+// ❌
+for (let i = 0; i < snippets.length; i++) {
+    if (snippets[i].id === id) { ... }
+}
 ```
 
 ---
 
-## 6. HTML
+## 6. JavaScript — paradigmes
+
+### Paradigme général
+
+Procédural uniquement. Pas de classes.
+
+```javascript
+// ✅ — objet de configuration
+const badgeColors = {
+    'JavaScript': 'bg-yellow-500 text-black',
+    'Python': 'bg-blue-500 text-white'
+}
+function getBadge(language) {
+    return badgeColors[language] || 'bg-gray-500 text-white'
+}
+
+// ❌ — classe interdite
+class SnippetManager {
+    constructor() { ... }
+    charger() { ... }
+}
+```
+
+### Système de modules
+
+| Couche | Système | Exemple |
+|--------|---------|---------|
+| Backend | CommonJS | `require('express')` / `module.exports` |
+| Frontend | Scripts classiques + globales | `<script src="app.js">` |
+
+```javascript
+// ✅ Backend — CommonJS
+const express = require('express')
+module.exports = router
+
+// ❌ Backend — ESM interdit
+import express from 'express'
+
+// ✅ Frontend — variable globale
+let tousLesSnippets = []
+
+// ❌ Frontend — import/export interdit
+import { chargerSnippets } from './utils.js'
+```
+
+### Immutabilité
+
+Préférer les méthodes non-mutantes. Éviter la mutation directe des tableaux et objets.
+
+```javascript
+// ✅
+const nouveauxSnippets = [...tousLesSnippets, nouveauSnippet]
+
+// ❌
+tousLesSnippets.push(nouveauSnippet)
+```
+
+### État frontend
+
+Variables globales pour l'état partagé entre fonctions.
+
+```javascript
+// ✅ — état global simple
+const API_URL = 'http://localhost:3000'
+let tousLesSnippets = []
+```
+
+---
+
+## 7. HTML
 
 ### Structure obligatoire
 
@@ -294,7 +424,9 @@ const id = req.params.id
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-950 text-white min-h-screen">
+
     <!-- ============ CONTENU ============ -->
+
     <script src="[fichier].js"></script>
 </body>
 </html>
@@ -306,19 +438,56 @@ const id = req.params.id
 id → class → type → name → placeholder → value → onclick → href
 ```
 
+### Event handlers
+
+`onclick` inline dans le HTML. `addEventListener` interdit sauf cas exceptionnel justifié.
+
 ```html
 <!-- ✅ -->
-<input id="input-titre" class="w-full bg-gray-800" type="text" placeholder="Titre...">
+<button onclick="sauvegarderSnippet()" class="bg-purple-600 text-white px-6 py-2 rounded-lg">
+    Sauvegarder
+</button>
 
 <!-- ❌ -->
-<input placeholder="..." id="input-titre" type="text">
+<button id="btn-save">Sauvegarder</button>
+<!-- + document.getElementById('btn-save').addEventListener('click', ...) -->
+```
+
+### Rendu DOM
+
+`innerHTML` avec template literals pour les listes. `textContent` pour les valeurs unitaires.
+
+```javascript
+// ✅ — liste (innerHTML)
+liste.innerHTML = snippets.map(s => `
+    <div onclick="afficherDetail(${s.id})">${s.title}</div>
+`).join('')
+
+// ✅ — valeur unitaire (textContent — pas de risque XSS)
+document.querySelector('#detail-snippet h2').textContent = snippet.title
+document.querySelector('#detail-snippet pre').textContent = snippet.code
+```
+
+> `innerHTML` est utilisé sur des données internes. Risque XSS limité dans ce contexte de projet privé — choix assumé.
+
+### Sélecteurs DOM
+
+```javascript
+// ✅ — id unique
+document.getElementById('liste-snippets')
+
+// ✅ — sélecteur complexe
+document.querySelector('#detail-snippet h2')
+
+// ❌ — querySelector pour un id simple
+document.querySelector('#liste-snippets')
 ```
 
 Règles : 4 espaces · balises fermées · `<script>` avant `</body>`.
 
 ---
 
-## 7. Tailwind CSS
+## 8. Tailwind CSS
 
 Tailwind en priorité. `style=""` interdit. `style.css` réservé aux exceptions.
 
@@ -338,6 +507,7 @@ layout → spacing → sizing → colors → typography → borders → interact
 | Texte | `text-white` |
 | Texte secondaire | `text-gray-400` |
 | Accent | `text-purple-400` / `bg-purple-600` |
+| Survol accent | `hover:bg-purple-700` |
 | Bouton danger | `bg-red-700` / `hover:bg-red-600` |
 | Bordures | `border-gray-700` / `border-gray-600` |
 | Focus | `focus:border-purple-500 focus:outline-none` |
@@ -356,28 +526,53 @@ layout → spacing → sizing → colors → typography → borders → interact
 
 ---
 
-## 8. Backend Node.js
+## 9. Backend Node.js
 
 ### Structure de `server.js`
 
 ```javascript
+// ============ IMPORTS ============
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
 
+// ============ CRÉATION DU SERVEUR ============
 const app = express()
+
+// ============ CONFIGURATION ============
 app.use(cors())
 app.use(express.json())
 
+// ============ ROUTES ============
 const snippetsRouter = require('./routes/snippets')
 app.use('/snippets', snippetsRouter)
 
+// ============ ROUTE DE TEST ============
 app.get('/', (req, res) => {
     res.json({ message: 'Bienvenue sur le serveur CodeGrimoire !' })
 })
 
+// ============ DÉMARRAGE ============
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`))
+```
+
+### Structure de `supabase.js`
+
+```javascript
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: true })
+
+const { createClient } = require('@supabase/supabase-js')
+const ws = require('ws')
+// ws : package WebSocket requis pour Node.js < 22
+
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SECRET_KEY,
+    { realtime: { transport: ws } }
+)
+
+module.exports = { supabase }
 ```
 
 ### Modèle de route
@@ -396,6 +591,13 @@ router.get('/', async (req, res) => {
     }
 })
 ```
+
+### Format des réponses
+
+| Cas | Format |
+|-----|--------|
+| Succès | Data brute — `res.json(data)` |
+| Erreur | `{ type, message }` — `res.status(400).json({ type: 'ValidationError', message: '...' })` |
 
 ### Codes HTTP
 
@@ -418,7 +620,7 @@ router.get('/', async (req, res) => {
 
 ---
 
-## 9. Base de données
+## 10. Base de données
 
 ### Table `snippets`
 
@@ -451,12 +653,12 @@ await supabase.from('snippets').delete().eq('id', id)
 
 ---
 
-## 10. Gestion des erreurs
+## 11. Gestion des erreurs
 
 - Toutes les fonctions `async` utilisent `try/catch`.
 - Erreurs loggées avec `console.error()`, jamais `console.log()`.
 - Champs obligatoires vérifiés avant l'appel API.
-- L'utilisateur reçoit toujours un retour visuel.
+- Retour visuel via `alert()` — choix assumé, pas de composant toast.
 
 ```javascript
 async function sauvegarderSnippet() {
@@ -479,7 +681,9 @@ async function sauvegarderSnippet() {
 
 ---
 
-## 11. Sécurité
+## 12. Sécurité et environnements
+
+### Variables d'environnement
 
 Fichier `backend/.env` — jamais commité.
 
@@ -488,13 +692,15 @@ SUPABASE_URL=https://xxxxx.supabase.co
 SUPABASE_SECRET_KEY=sb_secret_xxxxx
 ```
 
-Fichier `.gitignore` :
+### Fichier `.gitignore`
 
 ```
 node_modules/
 .env
 .DS_Store
 ```
+
+### Règles
 
 | Règle | Statut |
 |-------|--------|
@@ -503,22 +709,34 @@ node_modules/
 | RLS Supabase | Désactivé (S2), activé en S4 |
 | CORS | Configuré via `cors()` dans `server.js` |
 
-Environnements :
+### Environnements
 
-| Env | URL | Où |
-|-----|-----|----|
-| Développement | `http://localhost:3000` | `app.js`, `formulaire.js` |
-| Production (S5) | `https://codegrimoire.vercel.app` | Variable Vercel |
+| Env | `API_URL` | Statut |
+|-----|-----------|--------|
+| Développement | `http://localhost:3000` | Actuel |
+| Production (S5) | Variable d'environnement Vercel | À configurer en S5 |
+
+Migration prévue en S5 :
+
+```javascript
+// Actuel
+const API_URL = 'http://localhost:3000'
+
+// S5 — API_URL injectée par Vercel
+const API_URL = process.env.API_URL || 'http://localhost:3000'
+```
 
 ---
 
-## 12. Git
+## 13. Git
 
 ### Format des commits
 
 ```
 type : Description courte en français
 ```
+
+Première lettre en majuscule. Pas de point final. Maximum 72 caractères.
 
 ### Types
 
@@ -552,31 +770,31 @@ feat : Bouton Supprimer fonctionnel
 feat : Bouton Modifier fonctionnel — CRUD complet
 design : Badges de langage colorés
 fix : Correction bug modifier sans sélection
-docs : CONVENTIONS v1.4 — version finale
+docs : CONVENTIONS v1.5 — paradigmes et syntaxe complets
 ```
 
 ---
 
-## 13. Structure du projet
+## 14. Structure du projet
 
 ```
 CodeGrimoire/
 ├── backend/
 │   ├── routes/
-│   │   └── snippets.js
-│   ├── .env
-│   ├── server.js
-│   └── supabase.js
+│   │   └── snippets.js         Routes CRUD
+│   ├── .env                    Variables secrètes (non versionné)
+│   ├── server.js               Point d'entrée Express
+│   └── supabase.js             Connexion Supabase
 ├── frontend/
-│   ├── index.html
-│   ├── formulaire.html
-│   ├── connexion.html
-│   ├── app.js
-│   ├── formulaire.js
-│   └── style.css
+│   ├── index.html              Page principale
+│   ├── formulaire.html         Ajout et modification
+│   ├── connexion.html          Anticipation S4 — non fonctionnel
+│   ├── app.js                  JS principal
+│   ├── formulaire.js           JS formulaire
+│   └── style.css               Styles additionnels
 ├── docs/
-│   └── CONVENTIONS.md
-├── .eslintrc.json
+│   └── CONVENTIONS.md          Ce document
+├── .eslintrc.json              Configuration ESLint
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -584,11 +802,11 @@ CodeGrimoire/
 
 ---
 
-## 14. Interfaces
+## 15. Interfaces
 
 Le projet est en JavaScript vanilla. Les interfaces sont documentées en JSDoc et anticipent une migration TypeScript.
 
-### Règle globale
+### Règle
 
 `interface` par défaut pour tout objet structuré. `type` uniquement pour les unions.
 
@@ -633,13 +851,13 @@ interface User {
     created_at: string
 }
 
-// type pour les unions simples uniquement
+// type pour les unions uniquement
 type Langage = 'JavaScript' | 'Python' | 'HTML' | 'CSS' | 'SQL' | 'PHP'
 ```
 
 ---
 
-## 15. ESLint
+## 16. ESLint
 
 ```bash
 npm install --save-dev eslint
@@ -655,6 +873,7 @@ Scripts dans `package.json` :
 ```
 
 Lancer **avant chaque commit** : `npm run lint`
+Si le lint échoue, le commit ne doit pas être fait.
 
 Fichier `.eslintrc.json` :
 
@@ -683,7 +902,7 @@ Fichier `.eslintrc.json` :
 
 ---
 
-## 16. Changelog
+## 17. Changelog
 
 | Version | Date | Modifications |
 |---------|------|---------------|
@@ -691,7 +910,8 @@ Fichier `.eslintrc.json` :
 | 1.1 | 28/05/2026 | Comparaisons, Déstructuration, ESLint, Environnements, Async/Await |
 | 1.2 | 29/05/2026 | Statut, branches Git, lint avant commit |
 | 1.3 | 29/05/2026 | Décisions d'architecture, Pourquoi, Types/Interfaces, Classes d'erreurs |
-| 1.4 | 29/05/2026 | Version allégée — sections fusionnées, interface par défaut |
+| 1.4 | 29/05/2026 | Version allégée, interface par défaut |
+| 1.5 | 29/05/2026 | Retour Benoît Pascal : paradigmes explicites, function vs arrow, modules, DOM, event handlers, guard clauses, immutabilité, format réponses, nommage mixte justifié |
 
 ---
 
