@@ -1,5 +1,8 @@
 // ============ CHARGEMENT DES VARIABLES D'ENVIRONNEMENT ============
 require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: true })
+// dotenv : charge les variables depuis backend/.env
+// __dirname : chemin du dossier actuel (backend/)
+// override: true : force le rechargement même si déjà chargé
 
 // ============ CONNEXION SUPABASE ============
 const { createClient } = require('@supabase/supabase-js')
@@ -10,7 +13,9 @@ const ws = require('ws')
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
+    // SUPABASE_URL : URL du projet Supabase depuis le .env
     process.env.SUPABASE_SECRET_KEY,
+    // SUPABASE_SECRET_KEY : clé secrète depuis le .env
     {
         realtime: {
             transport: ws
