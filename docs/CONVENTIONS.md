@@ -1,6 +1,6 @@
 # CONVENTIONS : CodeGrimoire
 
-**Version :** 3.21
+**Version :** 3.22
 **Date :** 1 juin 2026
 **Statut :** Actif
 **Auteur :** Louka Kuhl, Agence418
@@ -31,7 +31,7 @@ Référence unique pour le développement de CodeGrimoire. En cas de doute, cons
 | Modules backend | CommonJS | `require` / `module.exports` : pas de `"type": "module"` dans `package.json` |
 | Modules frontend | Scripts classiques | `<script src>` + variables globales : pas d'`import/export` |
 | Déclaration de fonction | `function` pour les nommées, `=>` pour les callbacks | Lisibilité et cohérence |
-| Rendu DOM | `innerHTML` pour les listes, `textContent` pour les valeurs unitaires | Simplicité : risque XSS limité, projet privé, choix assumé |
+| Rendu DOM | `textContent` par défaut, `innerHTML` seulement pour les listes avec contenu utilisateur échappé | `textContent` neutralise le XSS ; `innerHTML` l'expose, donc on échappe systématiquement le contenu utilisateur |
 | Event handlers | `onclick` inline pour les statiques, délégation pour les dynamiques | Cohérence avec l'architecture sans modules |
 | Retour utilisateur | `alert()` | Choix assumé : pas de composant toast dans ce projet |
 | Nommage des fonctions | Verbes français + termes techniques anglais | Lisibilité en contexte francophone (`chargerSnippets`, `afficherDetail`) |
@@ -772,13 +772,20 @@ liste.innerHTML = snippets.map(s => `<div onclick="afficherDetail(${s.id})">`).j
 
 ### Rendu DOM
 
-`innerHTML` pour les listes dynamiques. `textContent` pour les valeurs unitaires.
+`textContent` par défaut : il neutralise le HTML, donc aucun risque XSS. `innerHTML` uniquement pour construire des listes, et dans ce cas le contenu venant de l'utilisateur (titre, tags, langage) doit être échappé avant insertion.
 
 ```javascript
-// ✅ : liste (innerHTML + data-id)
+// échapperHtml : neutralise le HTML d'une chaîne avant insertion via innerHTML
+function echapperHtml(texte) {
+    const div = document.createElement('div')
+    div.textContent = texte
+    return div.innerHTML
+}
+
+// ✅ : liste (innerHTML + data-id + contenu utilisateur échappé)
 liste.innerHTML = snippets.map(s => `
     <div data-id="${s.id}" class="p-3 mb-2 bg-gray-800 rounded-lg cursor-pointer">
-        <span>${s.title}</span>
+        <span>${echapperHtml(s.title)}</span>
     </div>
 `).join('')
 
@@ -787,7 +794,7 @@ document.getElementById('detail-titre').textContent = snippet.title
 document.getElementById('detail-code').textContent = snippet.code
 ```
 
-> `innerHTML` sur la liste comporte un risque XSS potentiel. Choix assumé dans le cadre de ce projet privé.
+> Le risque XSS est réel ici, pas théorique : l'application stocke du code, donc un titre ou un tag contenant par exemple `<img onerror=...>` s'exécuterait s'il était inséré tel quel via `innerHTML`. La règle n'est pas "on assume parce que le projet est privé", mais "on échappe toujours le contenu utilisateur, ou on utilise textContent".
 
 ### Sélecteurs DOM
 
@@ -1437,11 +1444,11 @@ function getBadge(language = 'Autre') {
 }
 ```
 
-### JSDoc : interfaces
+### JSDoc : types d'objets (@typedef)
 
 ```javascript
 /**
- * @interface Snippet
+ * @typedef {Object} Snippet
  * @property {number} id
  * @property {string} title
  * @property {string} code
@@ -1452,7 +1459,7 @@ function getBadge(language = 'Autre') {
  */
 
 /**
- * @interface User
+ * @typedef {Object} User
  * @property {string} id
  * @property {string} email
  * @property {string} created_at
@@ -1619,6 +1626,7 @@ Installer l'extension **EditorConfig for VS Code** (`editorconfig.editorconfig`)
 | 3.19 | 01/06/2026 | Audit senior (3e passe) : exemple `dataset` (section 8) complété avec `getElementById('detail-snippet')` (la variable `conteneurDetail` était utilisée sans être déclarée, ce qui contredisait la règle de sélection par getElementById) |
 | 3.20 | 01/06/2026 | Audit senior (4e passe) : accentuation des majuscules uniformisée dans les délimiteurs (section 4) : DÉTECTÉE, DÉTAIL, DONNÉES, ÉDITION (le reste du document accentuait déjà les majuscules) |
 | 3.21 | 01/06/2026 | Audit senior (5e passe) : note ajoutée pour expliquer le placement du lancement (tête dans formulaire.js, fin dans app.js) ; contradiction CSS levée dans les décisions (style.css réservé aux exceptions au lieu de "pas de fichier CSS") ; deux commentaires de palette raccourcis sous 100 caractères |
+| 3.22 | 02/06/2026 | Correction de fond (exactitude) : JSDoc `@interface` remplacé par `@typedef {Object}` (syntaxe correcte pour décrire un objet en JS) ; section Rendu DOM revue, justification XSS durcie et exemple rendu cohérent avec une fonction echapperHtml() (le contenu utilisateur inséré via innerHTML est désormais échappé) |
 
 ---
 
