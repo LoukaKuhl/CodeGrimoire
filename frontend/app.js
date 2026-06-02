@@ -112,6 +112,36 @@ function afficherDetail(id) {
     // Met à jour le badge avec la bonne couleur
 }
 
+// ============ COPIER UN SNIPPET ============
+async function copierSnippet() {
+    const id = document.getElementById('detail-snippet').dataset.id
+    // Récupère l'id du snippet actuellement affiché
+
+    if (!id) {
+        alert('Sélectionne un snippet à copier !')
+        return
+    }
+
+    const code = document.getElementById('detail-code').textContent
+    // Récupère le code affiché dans la zone de détail
+
+    try {
+        await navigator.clipboard.writeText(code)
+        // navigator.clipboard.writeText : copie le texte dans le presse-papier
+
+        const bouton = document.getElementById('btn-copier')
+        bouton.textContent = 'Copié !'
+        // Retour visuel : confirme la copie à l'utilisateur
+
+        setTimeout(() => {
+            bouton.textContent = 'Copier'
+        }, 2000)
+        // Remet le texte d'origine après 2 secondes
+    } catch (erreur) {
+        console.error('Erreur copie :', erreur)
+    }
+}
+
 // ============ MODIFIER UN SNIPPET ============
 function modifierSnippet() {
     const id = document.getElementById('detail-snippet').dataset.id
