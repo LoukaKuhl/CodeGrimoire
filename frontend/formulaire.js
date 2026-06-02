@@ -1,6 +1,8 @@
-// ============ URL DE L'API ============
-const API_URL = 'http://localhost:3000'
-// API_URL : adresse du serveur backend
+// ============ URL DE L'API (DÉTECTÉE DYNAMIQUEMENT) ============
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : 'https://[url-vercel-a-definir-en-s5].vercel.app'
+// API_URL : détectée automatiquement selon l'environnement (alignée sur app.js)
 
 const urlParams = new URLSearchParams(window.location.search)
 // URLSearchParams : lit les paramètres de l'URL (?id=4)
@@ -26,9 +28,9 @@ async function chargerSnippetExistant() {
         const snippets = await response.json()
         // .json() : convertit la réponse en tableau JavaScript
 
-        const snippet = snippets.find(s => s.id == snippetId)
+        const snippet = snippets.find(s => s.id === Number(snippetId))
         // .find() : cherche le snippet dont l'id correspond à celui de l'URL
-        // == au lieu de === car snippetId est une chaîne et s.id un nombre
+        // Number() : convertit l'id de l'URL (chaîne) en nombre pour comparer avec ===
 
         if (!snippet) return
         // Si le snippet n'existe pas, arrête la fonction
