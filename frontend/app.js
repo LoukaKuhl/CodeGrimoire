@@ -110,6 +110,10 @@ function afficherDetail(id) {
     badge.textContent = snippet.language
     badge.className = `text-xs px-2 py-0.5 rounded-full font-medium ${getBadge(snippet.language)}`
     // Met à jour le badge avec la bonne couleur
+
+    const tags = document.getElementById('detail-tags')
+    tags.textContent = snippet.tags ? `Tags : ${snippet.tags}` : ''
+    // Affiche les tags sous le titre, ou rien s'il n'y en a pas
 }
 
 // ============ COPIER UN SNIPPET ============
@@ -186,6 +190,9 @@ async function supprimerSnippet() {
             badge.textContent = 'Langage'
             badge.className = 'text-xs px-2 py-0.5 rounded-full font-medium bg-gray-700 text-white'
             // Remet la zone de détail à son état initial
+
+            document.getElementById('detail-tags').textContent = ''
+            // Vide la zone des tags après suppression
 
             await chargerSnippets()
             // Recharge la liste après suppression
