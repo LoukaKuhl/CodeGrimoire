@@ -51,14 +51,14 @@ async function chargerSnippets() {
 }
 
 // ============ AFFICHER LES SNIPPETS DANS LA SIDEBAR ============
-function afficherSnippets(snippets) {
+function afficherSnippets(snippets, messageVide = 'Aucun snippet pour l\'instant') {
     const liste = document.getElementById('liste-snippets')
     // getElementById : trouve l'élément avec l'id "liste-snippets"
 
     if (snippets.length === 0) {
-        liste.innerHTML = '<p class="text-gray-500 text-sm text-center mt-8">Aucun snippet pour l\'instant</p>'
+        liste.innerHTML = `<p class="text-gray-500 text-sm text-center mt-8">${messageVide}</p>`
         return
-        // Si pas de snippets, affiche un message et arrête la fonction
+        // Si pas de snippets, affiche le message reçu et arrête la fonction
     }
 
     liste.innerHTML = snippets.map(s => `
@@ -214,8 +214,8 @@ function rechercherSnippets(recherche) {
     )
     // .filter() : garde seulement les snippets dont le titre, le langage ou les tags contiennent le terme
 
-    afficherSnippets(resultats)
-    // Affiche les snippets filtrés
+    afficherSnippets(resultats, 'Aucun résultat pour cette recherche')
+    // Affiche les résultats, avec un message dédié si la recherche ne trouve rien
 }
 
 // ============ LANCEMENT AU CHARGEMENT DE LA PAGE ============
