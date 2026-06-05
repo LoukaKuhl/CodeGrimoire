@@ -1,10 +1,26 @@
-const { supabase } = require('../supabase')
+import { supabase } from '../supabase'
+
+interface Snippet {
+    id: number
+    title: string
+    code: string
+    language: string
+    tags: string | null
+    created_at: string
+}
+
+interface DonneesSnippet {
+    title: string
+    code: string
+    language: string
+    tags?: string
+}
 
 /**
  * Récupère tous les snippets de la table.
- * @returns {Promise<Array>} Liste des snippets
+ * @returns Liste des snippets
  */
-async function listerSnippets() {
+async function listerSnippets(): Promise<Snippet[]> {
     const { data, error } = await supabase
         .from('snippets')
         .select('*')
@@ -15,10 +31,9 @@ async function listerSnippets() {
 
 /**
  * Crée un snippet à partir des champs fournis.
- * @param {{title: string, code: string, language: string, tags?: string}} donnees
- * @returns {Promise<Array>} Snippet créé (tableau d'une ligne renvoyé par Supabase)
+ * @returns Snippet créé (tableau d'une ligne renvoyé par Supabase)
  */
-async function creerSnippet(donnees) {
+async function creerSnippet(donnees: DonneesSnippet): Promise<Snippet[]> {
     const { title, code, language, tags } = donnees
 
     const { data, error } = await supabase
@@ -32,11 +47,10 @@ async function creerSnippet(donnees) {
 
 /**
  * Modifie un snippet existant.
- * @param {string|number} id Identifiant du snippet
- * @param {{title: string, code: string, language: string, tags?: string}} donnees
- * @returns {Promise<Array>} Snippet modifié (tableau d'une ligne renvoyé par Supabase)
+ * @param id Identifiant du snippet
+ * @returns Snippet modifié (tableau d'une ligne renvoyé par Supabase)
  */
-async function modifierSnippet(id, donnees) {
+async function modifierSnippet(id: string, donnees: DonneesSnippet): Promise<Snippet[]> {
     const { title, code, language, tags } = donnees
 
     const { data, error } = await supabase
@@ -51,9 +65,9 @@ async function modifierSnippet(id, donnees) {
 
 /**
  * Supprime un snippet par son identifiant.
- * @param {string|number} id Identifiant du snippet
+ * @param id Identifiant du snippet
  */
-async function supprimerSnippet(id) {
+async function supprimerSnippet(id: string): Promise<void> {
     const { error } = await supabase
         .from('snippets')
         .delete()
@@ -62,7 +76,9 @@ async function supprimerSnippet(id) {
     if (error) throw error
 }
 
-module.exports = {
+export {
+    Snippet,
+    DonneesSnippet,
     listerSnippets,
     creerSnippet,
     modifierSnippet,

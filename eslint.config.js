@@ -1,15 +1,28 @@
 const js = require('@eslint/js')
 const globals = require('globals')
+const tseslint = require('typescript-eslint')
 
 module.exports = [
     // Règles recommandées de base d'ESLint
     js.configs.recommended,
 
-    // Fichiers Node.js : config à la racine + backend (CommonJS)
+    // Fichiers Node.js à la racine (CommonJS)
     {
-        files: ['*.js', 'backend/**/*.js'],
+        files: ['*.js'],
         languageOptions: {
             sourceType: 'commonjs',
+            globals: { ...globals.node }
+        }
+    },
+
+    // Backend : TypeScript, règles recommandées de typescript-eslint
+    ...tseslint.configs.recommended.map((config) => ({
+        ...config,
+        files: ['backend/**/*.ts']
+    })),
+    {
+        files: ['backend/**/*.ts'],
+        languageOptions: {
             globals: { ...globals.node }
         }
     },
@@ -33,8 +46,17 @@ module.exports = [
         }
     },
 
+    // En TypeScript, la détection des variables inutilisées revient à typescript-eslint
+    {
+        files: ['backend/**/*.ts'],
+        rules: {
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': 'warn'
+        }
+    },
+
     // Dossiers à ignorer
     {
-        ignores: ['node_modules/']
+        ignores: ['node_modules/', 'dist/']
     }
 ]

@@ -2,9 +2,11 @@
   "name": "codegrimoire-i-code",
   "version": "1.0.0",
   "description": "Un bloc-notes privé pour stocker et retrouver ses morceaux de code.",
-  "main": "backend/server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node backend/server.ts",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,7 +22,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.1",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.39.4",
-    "globals": "^17.6.0"
+    "globals": "^17.6.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1"
   }
 }

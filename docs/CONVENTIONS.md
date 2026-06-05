@@ -1,6 +1,6 @@
 # CONVENTIONS : CodeGrimoire
 
-**Version :** 4.0
+**Version :** 5.0
 **Projet :** CodeGrimoire, bloc-notes de code privé
 **Auteur :** Louka Kuhl, Agence418
 **Historique des versions :** tracé dans Git.
@@ -15,11 +15,12 @@ Règlement de développement de CodeGrimoire. À suivre sans exception. En cas d
 |----------|-------|----------|
 | Frontend | HTML + Tailwind + JS vanilla | Apprentissage des bases sans surcouche de framework |
 | Backend | Node.js + Express | Même langage front et back |
+| Langage backend | TypeScript (mode strict) | Typage statique, erreurs détectées à la compilation |
 | Base de données | Supabase (PostgreSQL) | API REST intégrée, dashboard visuel |
 | Déploiement | Vercel | Intégration GitHub native, zéro config Node.js |
 | CSS | Tailwind | Classes utilitaires dans le HTML, `style.css` réservé aux exceptions |
 | Paradigme | Procédural | Fonctions et objets de configuration, pas de classes (exception : erreurs typées) |
-| Modules backend | CommonJS | Pas de configuration de build sur ce projet |
+| Modules backend | CommonJS | Sortie compilée par `tsc` (`backend/` → `dist/`), exécutée par Node sans `"type": "module"` |
 
 ---
 
@@ -49,7 +50,7 @@ Nommage en français.
 |---------|------------|---------|
 | Variables, fonctions | camelCase, verbe pour les fonctions | `tousLesSnippets`, `chargerSnippets` |
 | Constantes globales | SCREAMING_SNAKE | `API_URL` |
-| Types (référence future) | PascalCase | `Snippet` |
+| Types, interfaces | PascalCase | `Snippet`, `DonneesSnippet` |
 | Booléens | préfixe `est`, `a`, `peut` | `estConnecte` |
 | Paramètres Express | `req`, `res` | |
 | Paramètre de catch | `erreur` | |
@@ -76,6 +77,8 @@ liste.addEventListener('click', (e) => { ... })
 ## Documentation du code
 
 Documenter les fonctions publiques avec JSDoc : ce qu'elles font, pas comment. Les paramètres non évidents, la valeur de retour si elle n'est pas explicite, les cas d'erreur.
+
+Dans le backend TypeScript, les types sont portés par les signatures : la JSDoc ne les répète pas (`@param id Identifiant du snippet`, sans accolades de type).
 
 Pas de commentaire ligne par ligne dans le code livré. Tu peux en écrire dans ton brouillon pour comprendre, mais retire-les avant de committer. Une fonction courte au nom explicite n'a pas besoin de documentation.
 
@@ -106,26 +109,28 @@ Le lancement se place en dernier, sauf quand il doit détecter un mode au charge
 
 Responsabilités séparées. La logique ne vit jamais dans la route.
 
-- `server.js` : configuration Express, middlewares, montage des routes.
+- `server.ts` : configuration Express, middlewares, montage des routes.
 - `routes/` : HTTP uniquement (routing, validation des entrées, réponses). Pas d'accès direct à Supabase.
 - `services/` : logique métier et accès aux données. Testable sans serveur HTTP.
-- `supabase.js` : connexion à la base, utilisée par les services.
+- `supabase.ts` : connexion à la base, utilisée par les services.
 
-```javascript
-// services/snippets.service.js : la logique, sans rien savoir du HTTP
-async function creerSnippet(donnees) {
+Le backend est en TypeScript : syntaxe `import`/`export` dans les sources, compilée en CommonJS par `tsc` vers `dist/`. Les interfaces (`Snippet`, `DonneesSnippet`) vivent dans le service qui les expose.
+
+```typescript
+// services/snippets.service.ts : la logique, sans rien savoir du HTTP
+async function creerSnippet(donnees: DonneesSnippet): Promise<Snippet[]> {
     const { data, error } = await supabase.from('snippets').insert([donnees]).select()
     if (error) throw error
     return data
 }
 
-// routes/snippets.js : juste recevoir et répondre
-router.post('/', async (req, res) => {
+// routes/snippets.ts : juste recevoir et répondre
+router.post('/', async (req: Request, res: Response) => {
     try {
         const snippet = await creerSnippet(req.body)
         res.status(201).json(snippet)
     } catch (erreur) {
-        res.status(500).json({ error: erreur.message })
+        res.status(500).json({ error: messageErreur(erreur) })
     }
 })
 ```
@@ -185,7 +190,7 @@ Codes HTTP utilisés : 200, 201, 400, 401, 403, 404, 500.
 
 ## Outillage
 
-Le formatage et les règles syntaxiques sont portés par **ESLint** et **EditorConfig**, qui font foi. Ne pas réécrire ces règles ici : voir `.eslintrc.json` et `.editorconfig`.
+Le formatage et les règles syntaxiques sont portés par **ESLint** (avec typescript-eslint pour le backend) et **EditorConfig**, qui font foi. Ne pas réécrire ces règles ici : voir `eslint.config.js` et `.editorconfig`. La configuration TypeScript vit dans `tsconfig.json` (mode strict).
 
 Réglages de référence : indentation 4 espaces (2 pour le JSON), 100 caractères par ligne, pas de point-virgule, apostrophes en JS, guillemets doubles en HTML et JSON, ESLint sans Prettier.
 
