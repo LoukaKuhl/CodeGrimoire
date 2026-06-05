@@ -21,6 +21,12 @@ function getBadge(language = 'Autre') {
     return badgeColors[language] ?? badgeColors['Autre']
 }
 
+function echapperHtml(texte) {
+    const div = document.createElement('div')
+    div.textContent = texte
+    return div.innerHTML
+}
+
 let tousLesSnippets = []
 
 async function chargerSnippets() {
@@ -46,9 +52,9 @@ function afficherSnippets(snippets, messageVide = 'Aucun snippet pour l\'instant
         <div
             data-id="${s.id}"
             class="bg-gray-800 rounded-lg p-3 mb-2 cursor-pointer hover:bg-gray-700 border border-transparent hover:border-purple-500 transition-all">
-            <p class="text-white text-sm font-semibold mb-1">${s.title}</p>
+            <p class="text-white text-sm font-semibold mb-1">${echapperHtml(s.title)}</p>
             <span class="text-xs px-2 py-0.5 rounded-full font-medium ${getBadge(s.language)}">
-                ${s.language}
+                ${echapperHtml(s.language)}
             </span>
         </div>
     `).join('')

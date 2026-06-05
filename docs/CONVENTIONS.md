@@ -1,6 +1,6 @@
 # CONVENTIONS : CodeGrimoire
 
-**Version :** 5.0
+**Version :** 5.1
 **Projet :** CodeGrimoire, bloc-notes de code privé
 **Auteur :** Louka Kuhl, Agence418
 **Historique des versions :** tracé dans Git.
@@ -26,7 +26,7 @@ Règlement de développement de CodeGrimoire. À suivre sans exception. En cas d
 
 ## Paradigme
 
-Procédural : des fonctions et des objets de configuration. Pas de classes, sauf pour les erreurs typées (`ValidationError`, `NotFoundError`) où étendre `Error` est imposé par le langage.
+Procédural : des fonctions et des objets de configuration. Pas de classes, sauf pour les erreurs typées (`ValidationError`, `NotFoundError`, prévues en S4) où étendre `Error` est imposé par le langage.
 
 Immutabilité par défaut :
 
@@ -110,7 +110,7 @@ Le lancement se place en dernier, sauf quand il doit détecter un mode au charge
 Responsabilités séparées. La logique ne vit jamais dans la route.
 
 - `server.ts` : configuration Express, middlewares, montage des routes.
-- `routes/` : HTTP uniquement (routing, validation des entrées, réponses). Pas d'accès direct à Supabase.
+- `routes/` : HTTP uniquement (routing, réponses ; la validation des entrées arrivera en S4). Pas d'accès direct à Supabase.
 - `services/` : logique métier et accès aux données. Testable sans serveur HTTP.
 - `supabase.ts` : connexion à la base, utilisée par les services.
 
@@ -180,11 +180,11 @@ Délégation d'événements plutôt que `onclick` inline dans un template géné
 
 ## Gestion des erreurs
 
-Le service lève une erreur typée, jamais de code HTTP dedans. La route attrape l'erreur avec un `try/catch` et choisit le code HTTP de la réponse. Gérer l'erreur de façon explicite dans chaque route est le choix actuel, assumé pour l'apprentissage.
+Le service relance l'erreur telle quelle, jamais de code HTTP dedans. La route attrape l'erreur avec un `try/catch` et choisit le code HTTP de la réponse. Gérer l'erreur de façon explicite dans chaque route est le choix actuel, assumé pour l'apprentissage.
 
-Codes HTTP utilisés : 200, 201, 400, 401, 403, 404, 500.
+Codes HTTP utilisés : 200, 201, 500.
 
-> Cible en semaine 4 : remplacer les `try/catch` répétés par un middleware d'erreur central (voir Évolutions prévues), une fois le réflexe du `try/catch` acquis.
+> Cible en semaine 4 : erreurs typées levées par les services (`ValidationError`, `NotFoundError`), validation des entrées dans les routes (400), identifiant inconnu (404), 401 et 403 avec l'authentification, puis remplacement des `try/catch` répétés par un middleware d'erreur central (voir Évolutions prévues), une fois le réflexe du `try/catch` acquis.
 
 ---
 
@@ -219,8 +219,7 @@ fix : Cohérence formulaire.js (API_URL dynamique et ===)
 | Semaine | Évolution |
 |---------|-----------|
 | S4 | Authentification Supabase, RLS sur la table, CORS restreint, colonne `user_id` |
+| S4 | Erreurs typées (`ValidationError`, `NotFoundError`), validation des entrées (400), identifiant inconnu (404) |
 | S4 | Middleware d'erreur central dans le backend (remplace les try/catch par route) |
 | S5 | Dark mode, PWA |
 | S5 | Déploiement Vercel : coller la vraie URL dans `app.js` et `formulaire.js` |
-| Qualité | Configurer ESLint, ajouter le script `lint`, corriger le champ `main` de `package.json` |
-| Qualité | Mettre le code existant en conformité : extraire la couche `services/`, retirer les commentaires ligne par ligne |
