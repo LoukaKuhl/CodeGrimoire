@@ -6,12 +6,9 @@ import {
     modifierSnippet,
     supprimerSnippet
 } from '../services/snippets.service'
+import { messageErreur } from '../utils/messageErreur'
 
 const router = express.Router()
-
-function messageErreur(erreur: unknown): string {
-    return erreur instanceof Error ? erreur.message : 'Erreur inattendue'
-}
 
 router.get('/', async (req: Request, res: Response) => {
     try {

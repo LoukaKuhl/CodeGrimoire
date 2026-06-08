@@ -51,7 +51,7 @@ module.exports = [
         files: ['backend/**/*.ts'],
         rules: {
             'no-unused-vars': 'off',
-            '@typescript-eslint/no-unused-vars': 'warn'
+            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }]
         }
     },
 
