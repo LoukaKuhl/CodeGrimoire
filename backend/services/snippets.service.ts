@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { NotFoundError } from '../erreurs'
 
 interface Snippet {
     id: number
@@ -60,6 +61,7 @@ async function modifierSnippet(id: string, donnees: DonneesSnippet): Promise<Sni
         .select()
 
     if (error) throw error
+    if (data.length === 0) throw new NotFoundError(`Aucun snippet avec l'id ${id}`)
     return data
 }
 
@@ -68,12 +70,14 @@ async function modifierSnippet(id: string, donnees: DonneesSnippet): Promise<Sni
  * @param id Identifiant du snippet
  */
 async function supprimerSnippet(id: string): Promise<void> {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('snippets')
         .delete()
         .eq('id', id)
+        .select()
 
     if (error) throw error
+    if (data.length === 0) throw new NotFoundError(`Aucun snippet avec l'id ${id}`)
 }
 
 export {

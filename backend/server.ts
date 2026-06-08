@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 
 import snippetsRouter from './routes/snippets'
 import { messageErreur } from './utils/messageErreur'
+import { ValidationError, NotFoundError } from './erreurs'
 
 dotenv.config()
 
@@ -38,6 +39,12 @@ app.use((req: Request, res: Response) => {
 
 app.use((erreur: unknown, req: Request, res: Response, _next: NextFunction) => {
     console.error(erreur)
+    if (erreur instanceof ValidationError) {
+        return res.status(400).json({ error: erreur.message })
+    }
+    if (erreur instanceof NotFoundError) {
+        return res.status(404).json({ error: erreur.message })
+    }
     res.status(500).json({ error: messageErreur(erreur) })
 })
 

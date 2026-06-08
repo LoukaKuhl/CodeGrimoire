@@ -1,6 +1,6 @@
 # CONVENTIONS : CodeGrimoire
 
-**Version :** 5.1
+**Version :** 5.2
 **Projet :** CodeGrimoire, bloc-notes de code privé
 **Auteur :** Louka Kuhl, Agence418
 **Historique des versions :** tracé dans Git.
@@ -26,7 +26,7 @@ Règlement de développement de CodeGrimoire. À suivre sans exception. En cas d
 
 ## Paradigme
 
-Procédural : des fonctions et des objets de configuration. Pas de classes, sauf pour les erreurs typées (`ValidationError`, `NotFoundError`, prévues en S4) où étendre `Error` est imposé par le langage.
+Procédural : des fonctions et des objets de configuration. Pas de classes, sauf pour les erreurs typées (`ValidationError`, `NotFoundError`, définies dans `backend/erreurs.ts`) où étendre `Error` est imposé par le langage.
 
 Immutabilité par défaut :
 
@@ -110,7 +110,7 @@ Le lancement se place en dernier, sauf quand il doit détecter un mode au charge
 Responsabilités séparées. La logique ne vit jamais dans la route.
 
 - `server.ts` : configuration Express, middlewares, montage des routes.
-- `routes/` : HTTP uniquement (routing, réponses ; la validation des entrées arrivera en S4). Pas d'accès direct à Supabase.
+- `routes/` : HTTP uniquement (routing, validation des entrées, transmission des erreurs au middleware central via `next`). Pas d'accès direct à Supabase.
 - `services/` : logique métier et accès aux données. Testable sans serveur HTTP.
 - `supabase.ts` : connexion à la base, utilisée par les services.
 
@@ -124,13 +124,14 @@ async function creerSnippet(donnees: DonneesSnippet): Promise<Snippet[]> {
     return data
 }
 
-// routes/snippets.ts : juste recevoir et répondre
-router.post('/', async (req: Request, res: Response) => {
+// routes/snippets.ts : recevoir, valider, déléguer les erreurs
+router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
+        validerDonneesSnippet(req.body)
         const snippet = await creerSnippet(req.body)
         res.status(201).json(snippet)
     } catch (erreur) {
-        res.status(500).json({ error: messageErreur(erreur) })
+        next(erreur)
     }
 })
 ```
@@ -180,11 +181,21 @@ Délégation d'événements plutôt que `onclick` inline dans un template géné
 
 ## Gestion des erreurs
 
-Le service relance l'erreur telle quelle, jamais de code HTTP dedans. La route attrape l'erreur avec un `try/catch` et choisit le code HTTP de la réponse. Gérer l'erreur de façon explicite dans chaque route est le choix actuel, assumé pour l'apprentissage.
+Le service relance l'erreur telle quelle, jamais de code HTTP dedans : soit l'erreur Supabase d'origine, soit une erreur typée métier (`NotFoundError` quand aucun snippet ne correspond à l'identifiant). La route valide les entrées (et lève `ValidationError` si un champ obligatoire manque), puis attrape toute erreur dans son `try/catch` et la transmet au middleware d'erreur central via `next(erreur)`, sans choisir elle-même le code HTTP.
 
-Codes HTTP utilisés : 200, 201, 500.
+Le middleware d'erreur central, dernier middleware de `server.ts`, fait correspondre le type d'erreur au code HTTP :
 
-> Cible en semaine 4 : erreurs typées levées par les services (`ValidationError`, `NotFoundError`), validation des entrées dans les routes (400), identifiant inconnu (404), 401 et 403 avec l'authentification, puis remplacement des `try/catch` répétés par un middleware d'erreur central (voir Évolutions prévues), une fois le réflexe du `try/catch` acquis.
+| Erreur | Code HTTP |
+|--------|-----------|
+| `ValidationError` | 400 |
+| `NotFoundError` | 404 |
+| Autre | 500 |
+
+Les classes d'erreur typées vivent dans `backend/erreurs.ts` (seules classes autorisées, cf. Paradigme).
+
+Codes HTTP utilisés : 200, 201, 400, 404, 500.
+
+> À venir avec l'authentification : 401 (non authentifié) et 403 (non autorisé).
 
 ---
 
@@ -219,7 +230,5 @@ fix : Cohérence formulaire.js (API_URL dynamique et ===)
 | Semaine | Évolution |
 |---------|-----------|
 | S4 | Authentification Supabase, RLS sur la table, CORS restreint, colonne `user_id` |
-| S4 | Erreurs typées (`ValidationError`, `NotFoundError`), validation des entrées (400), identifiant inconnu (404) |
-| S4 | Middleware d'erreur central dans le backend (remplace les try/catch par route) |
 | S5 | Dark mode, PWA |
 | S5 | Déploiement Vercel : coller la vraie URL dans `app.js` et `formulaire.js` |
