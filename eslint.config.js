@@ -32,7 +32,15 @@ module.exports = [
         files: ['frontend/**/*.js'],
         languageOptions: {
             sourceType: 'script',
-            globals: { ...globals.browser }
+            globals: { ...globals.browser, supabase: 'readonly' }
+        }
+    },
+
+    // Frontend : clientSupabase est défini dans supabase-client.js et consommé ailleurs
+    {
+        files: ['frontend/connexion.js', 'frontend/inscription.js', 'frontend/session.js'],
+        languageOptions: {
+            globals: { clientSupabase: 'readonly' }
         }
     },
 
@@ -42,7 +50,9 @@ module.exports = [
             'no-var': 'error',
             'prefer-const': 'error',
             'eqeqeq': 'error',
-            'no-unused-vars': 'warn'
+            'no-unused-vars': 'warn',
+            'semi': ['error', 'never'],
+            'quotes': ['error', 'single', { avoidEscape: true }]
         }
     },
 
