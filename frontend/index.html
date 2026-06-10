@@ -12,9 +12,14 @@
 
     <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <h1 class="text-xl font-bold text-purple-400">CodeGrimoire</h1>
-        <a href="formulaire.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
-            + Nouveau snippet
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="formulaire.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+                + Nouveau snippet
+            </a>
+            <button id="bouton-deconnexion" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm">
+                Déconnexion
+            </button>
+        </div>
     </nav>
 
     <div class="flex h-screen">
@@ -63,6 +68,10 @@
 
     </div>
 
+    <!-- ============ SUPABASE ============ -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="session.js"></script>
     <script src="app.js"></script>
 
 </body>

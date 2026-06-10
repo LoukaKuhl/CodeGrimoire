@@ -4,21 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeGrimoire - Connexion</title>
+    <title>CodeGrimoire - Inscription</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
 
-    <!-- ============ CARTE DE CONNEXION ============ -->
+    <!-- ============ CARTE D'INSCRIPTION ============ -->
     <div class="bg-gray-900 p-8 rounded-xl border border-gray-700 w-full max-w-md">
 
         <!-- ===== Titre ===== -->
-        <h1 class="text-2xl font-bold text-purple-400 text-center mb-2">CodeGrimoire</h1>
+        <h1 class="text-2xl font-bold text-purple-400 text-center mb-2">Créer un compte</h1>
 
-        <p class="text-gray-400 text-center text-sm mb-8">Connecte-toi pour accéder à tes snippets</p>
+        <p class="text-gray-400 text-center text-sm mb-8">Inscris-toi pour gérer tes snippets</p>
 
-        <form id="formulaire-connexion" class="flex flex-col gap-4">
+        <form id="formulaire-inscription" class="flex flex-col gap-4">
 
             <!-- ===== Champ email ===== -->
             <div>
@@ -33,12 +33,7 @@
 
             <!-- ===== Champ mot de passe ===== -->
             <div>
-                <div class="flex items-center justify-between mb-1">
-                    <label class="block text-sm text-gray-400">Mot de passe</label>
-                    <a href="#" class="text-xs text-purple-400 hover:text-purple-300">
-                        Mot de passe oublié ?
-                    </a>
-                </div>
+                <label class="block text-sm text-gray-400 mb-1">Mot de passe</label>
                 <div class="relative">
                     <input
                         type="password"
@@ -54,15 +49,9 @@
                 </div>
             </div>
 
-            <!-- ===== Se souvenir de moi ===== -->
-            <label class="flex items-center gap-2 text-sm text-gray-400">
-                <input type="checkbox" id="case-souvenir" checked class="accent-purple-600">
-                Se souvenir de moi
-            </label>
-
-            <!-- ===== Bouton connexion ===== -->
+            <!-- ===== Bouton inscription ===== -->
             <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold mt-2">
-                Se connecter
+                Créer un compte
             </button>
 
         </form>
@@ -70,11 +59,11 @@
         <!-- ===== Message d'erreur ===== -->
         <p id="message-erreur" class="text-center text-sm text-red-400 mt-4"></p>
 
-        <!-- ===== Lien inscription ===== -->
+        <!-- ===== Lien connexion ===== -->
         <p class="text-center text-sm text-gray-500 mt-6">
-            Pas encore de compte ?
-            <a href="inscription.html" class="text-purple-400 hover:text-purple-300">
-                Créer un compte
+            Déjà un compte ?
+            <a href="connexion.html" class="text-purple-400 hover:text-purple-300">
+                Se connecter
             </a>
         </p>
 
@@ -83,7 +72,7 @@
     <!-- ============ SUPABASE ============ -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
-    <script src="connexion.js"></script>
+    <script src="inscription.js"></script>
 
 </body>
 </html>
