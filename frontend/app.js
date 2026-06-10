@@ -32,11 +32,14 @@ let tousLesSnippets = []
 async function chargerSnippets() {
     try {
         const response = await fetch(`${API_URL}/snippets`)
+        if (!response.ok) throw new Error('HTTP ' + response.status)
         const snippets = await response.json()
         tousLesSnippets = snippets
         afficherSnippets(snippets)
     } catch (erreur) {
         console.error('Erreur lors du chargement :', erreur)
+        const liste = document.getElementById('liste-snippets')
+        liste.innerHTML = '<p class="text-red-400 text-sm text-center mt-8">Impossible de charger les snippets. Le serveur est-il démarré ?</p>'
     }
 }
 

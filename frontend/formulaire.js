@@ -38,6 +38,9 @@ async function sauvegarderSnippet() {
         return
     }
 
+    const bouton = document.getElementById('bouton-sauvegarder')
+    bouton.disabled = true
+
     try {
         const url = snippetId ? `${API_URL}/snippets/${snippetId}` : `${API_URL}/snippets`
         const method = snippetId ? 'PUT' : 'POST'
@@ -51,9 +54,13 @@ async function sauvegarderSnippet() {
         if (response.ok) {
             alert(snippetId ? 'Snippet modifié !' : 'Snippet sauvegardé !')
             window.location.href = 'index.html'
+        } else {
+            alert('Erreur lors de la sauvegarde. Réessaie plus tard.')
         }
-
     } catch (erreur) {
         console.error('Erreur :', erreur)
+        alert('Impossible de joindre le serveur. Vérifie ta connexion.')
+    } finally {
+        bouton.disabled = false
     }
 }

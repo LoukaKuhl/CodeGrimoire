@@ -31,18 +31,25 @@ formulaire.addEventListener("submit", async (evenement) => {
     evenement.preventDefault();
     messageErreur.textContent = "";
 
+    const boutonSoumettre = formulaire.querySelector("button[type='submit']");
+    boutonSoumettre.disabled = true;
+
     const email = champEmail.value;
     const motDePasse = champMotDePasse.value;
 
-    const { error } = await clientSupabase.auth.signUp({
-        email: email,
-        password: motDePasse,
-    });
+    try {
+        const { error } = await clientSupabase.auth.signUp({
+            email: email,
+            password: motDePasse,
+        });
 
-    if (error) {
-        messageErreur.textContent = error.message;
-        return;
+        if (error) {
+            messageErreur.textContent = error.message;
+            return;
+        }
+
+        window.location.href = "connexion.html";
+    } finally {
+        boutonSoumettre.disabled = false;
     }
-
-    window.location.href = "connexion.html";
 });

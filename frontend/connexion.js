@@ -32,20 +32,27 @@ formulaire.addEventListener("submit", async (evenement) => {
     evenement.preventDefault();
     messageErreur.textContent = "";
 
+    const boutonSoumettre = formulaire.querySelector("button[type='submit']");
+    boutonSoumettre.disabled = true;
+
     const email = champEmail.value;
     const motDePasse = champMotDePasse.value;
 
     localStorage.setItem("seSouvenir", caseSouvenir.checked ? "true" : "false");
 
-    const { error } = await clientSupabase.auth.signInWithPassword({
-        email: email,
-        password: motDePasse,
-    });
+    try {
+        const { error } = await clientSupabase.auth.signInWithPassword({
+            email: email,
+            password: motDePasse,
+        });
 
-    if (error) {
-        messageErreur.textContent = error.message;
-        return;
+        if (error) {
+            messageErreur.textContent = error.message;
+            return;
+        }
+
+        window.location.href = "index.html";
+    } finally {
+        boutonSoumettre.disabled = false;
     }
-
-    window.location.href = "index.html";
 });
