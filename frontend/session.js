@@ -3,7 +3,9 @@
     const { data } = await clientSupabase.auth.getSession()
     if (!data.session) {
         window.location.href = 'connexion.html'
+        return
     }
+    document.body.style.visibility = 'visible'
 })()
 
 const boutonDeconnexion = document.getElementById('bouton-deconnexion')
