@@ -38,17 +38,25 @@ formulaire.addEventListener('submit', async (e) => {
     const motDePasse = champMotDePasse.value
 
     try {
-        const { error } = await clientSupabase.auth.signUp({
+        const { data, error } = await clientSupabase.auth.signUp({
             email: email,
             password: motDePasse,
         })
 
         if (error) {
+            messageErreur.classList.remove('text-green-400')
+            messageErreur.classList.add('text-red-400')
             messageErreur.textContent = error.message
             return
         }
 
-        window.location.href = 'connexion.html'
+        if (data.session) {
+            window.location.href = 'index.html'
+        } else {
+            messageErreur.classList.remove('text-red-400')
+            messageErreur.classList.add('text-green-400')
+            messageErreur.textContent = 'Compte créé. Vérifie ta boîte mail pour confirmer ton adresse avant de te connecter.'
+        }
     } finally {
         boutonSoumettre.disabled = false
     }
