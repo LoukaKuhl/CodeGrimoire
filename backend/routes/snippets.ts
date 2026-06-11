@@ -8,8 +8,11 @@ import {
     supprimerSnippet
 } from '../services/snippets.service'
 import { ValidationError } from '../erreurs'
+import { authentification } from '../middlewares/authentification'
 
 const router = express.Router()
+
+router.use(authentification)
 
 /**
  * Vérifie que les champs obligatoires d'un snippet sont présents et non vides.
@@ -29,7 +32,7 @@ function validerDonneesSnippet(donnees: Partial<DonneesSnippet>): void {
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const snippets = await listerSnippets()
+        const snippets = await listerSnippets(req.clientSupabase)
         res.json(snippets)
     } catch (erreur) {
         next(erreur)
@@ -39,7 +42,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         validerDonneesSnippet(req.body)
-        const snippet = await creerSnippet(req.body)
+        const snippet = await creerSnippet(req.clientSupabase, req.body)
         res.status(201).json(snippet)
     } catch (erreur) {
         next(erreur)
@@ -49,7 +52,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 router.put('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
         validerDonneesSnippet(req.body)
-        const snippet = await modifierSnippet(req.params.id, req.body)
+        const snippet = await modifierSnippet(req.clientSupabase, req.params.id, req.body)
         res.json(snippet)
     } catch (erreur) {
         next(erreur)
@@ -58,7 +61,7 @@ router.put('/:id', async (req: Request<{ id: string }>, res: Response, next: Nex
 
 router.delete('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
-        await supprimerSnippet(req.params.id)
+        await supprimerSnippet(req.clientSupabase, req.params.id)
         res.json({ message: 'Snippet supprimé avec succès' })
     } catch (erreur) {
         next(erreur)

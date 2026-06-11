@@ -1,4 +1,4 @@
-import { supabase } from '../supabase'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { NotFoundError } from '../erreurs'
 
 interface Snippet {
@@ -19,10 +19,11 @@ interface DonneesSnippet {
 
 /**
  * Récupère tous les snippets de la table.
+ * @param client Client Supabase agissant au nom de l'utilisateur
  * @returns Liste des snippets
  */
-async function listerSnippets(): Promise<Snippet[]> {
-    const { data, error } = await supabase
+async function listerSnippets(client: SupabaseClient): Promise<Snippet[]> {
+    const { data, error } = await client
         .from('snippets')
         .select('*')
 
@@ -32,12 +33,13 @@ async function listerSnippets(): Promise<Snippet[]> {
 
 /**
  * Crée un snippet à partir des champs fournis.
+ * @param client Client Supabase agissant au nom de l'utilisateur
  * @returns Snippet créé (tableau d'une ligne renvoyé par Supabase)
  */
-async function creerSnippet(donnees: DonneesSnippet): Promise<Snippet[]> {
+async function creerSnippet(client: SupabaseClient, donnees: DonneesSnippet): Promise<Snippet[]> {
     const { title, code, language, tags } = donnees
 
-    const { data, error } = await supabase
+    const { data, error } = await client
         .from('snippets')
         .insert([{ title, code, language, tags }])
         .select()
@@ -48,13 +50,14 @@ async function creerSnippet(donnees: DonneesSnippet): Promise<Snippet[]> {
 
 /**
  * Modifie un snippet existant.
+ * @param client Client Supabase agissant au nom de l'utilisateur
  * @param id Identifiant du snippet
  * @returns Snippet modifié (tableau d'une ligne renvoyé par Supabase)
  */
-async function modifierSnippet(id: string, donnees: DonneesSnippet): Promise<Snippet[]> {
+async function modifierSnippet(client: SupabaseClient, id: string, donnees: DonneesSnippet): Promise<Snippet[]> {
     const { title, code, language, tags } = donnees
 
-    const { data, error } = await supabase
+    const { data, error } = await client
         .from('snippets')
         .update({ title, code, language, tags })
         .eq('id', id)
@@ -67,10 +70,11 @@ async function modifierSnippet(id: string, donnees: DonneesSnippet): Promise<Sni
 
 /**
  * Supprime un snippet par son identifiant.
+ * @param client Client Supabase agissant au nom de l'utilisateur
  * @param id Identifiant du snippet
  */
-async function supprimerSnippet(id: string): Promise<void> {
-    const { data, error } = await supabase
+async function supprimerSnippet(client: SupabaseClient, id: string): Promise<void> {
+    const { data, error } = await client
         .from('snippets')
         .delete()
         .eq('id', id)
