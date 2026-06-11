@@ -60,6 +60,13 @@ Supabase (base de données)
 Retour au navigateur, qui affiche la liste
 ```
 
+### Les briques techniques en détail
+
+- **Frontend** : HTML, Tailwind CSS (via CDN), JavaScript sans framework.
+- **Backend** : Node.js, Express et TypeScript, exécuté avec ts-node en développement. Sécurité assurée par helmet, cors et express-rate-limit. Connexion à Supabase via la librairie @supabase/supabase-js (et la librairie ws pour le support WebSocket sous Node 20).
+- **Base de données et authentification** : Supabase (PostgreSQL).
+- **Qualité du code** : ESLint et configuration TypeScript stricte.
+
 ---
 
 ## 3. La carte des fichiers du projet
@@ -78,6 +85,8 @@ Retour au navigateur, qui affiche la liste
 | `middlewares/authentification.ts` | vérifie le token avant chaque requête, refuse en 401 si absent |
 | `utils/messageErreur.ts` | met en forme un message d'erreur lisible |
 | `db/rls-snippets.sql` | sauvegarde du SQL qui sécurise la table (RLS et policies) |
+
+L'ordre des middlewares dans `server.ts` est important et suit cette séquence : sécurité des en-têtes (helmet), CORS, limitation de débit, lecture du JSON, routes, page introuvable (404), puis gestion centrale des erreurs.
 
 ### Frontend (`frontend/`)
 
@@ -113,13 +122,13 @@ La table principale est `snippets`. Ses colonnes :
 
 | Colonne | Type | Description |
 |---|---|---|
-| `id` | identifiant | clé unique du snippet |
+| `id` | entier | clé unique du snippet (générée automatiquement) |
 | `title` | texte | titre du snippet (obligatoire) |
 | `code` | texte | le code lui-même (obligatoire) |
 | `language` | texte | le langage, affiché en badge (obligatoire) |
 | `tags` | texte | étiquettes facultatives |
 | `created_at` | date/heure | date de création (automatique) |
-| `user_id` | identifiant | propriétaire du snippet, rempli automatiquement à la création |
+| `user_id` | uuid | identifiant du propriétaire du snippet, rempli automatiquement à la création |
 
 Les comptes utilisateurs ne sont pas dans cette table : ils sont gérés par le système d'authentification de Supabase (section Authentication du dashboard).
 
@@ -264,6 +273,7 @@ Champs obligatoires pour créer ou modifier : `title`, `code`, `language`. Si l'
 | 400 | données invalides | un champ obligatoire manque ou est vide |
 | 401 | non authentifié | token absent, invalide ou expiré (il faut se connecter) |
 | 404 | introuvable | le snippet n'existe pas, ou n'appartient pas à l'utilisateur |
+| 429 | trop de requêtes | plus de 100 requêtes en 15 minutes (limitation de débit) |
 | 500 | erreur serveur | un problème inattendu côté backend (voir les logs) |
 
 ---
@@ -372,6 +382,11 @@ Une fois en ligne, l'application est accessible depuis n'importe quel appareil (
 
 **Cause probable :** snippet inexistant, ou n'appartenant pas au compte connecté.
 **Solution :** vérifier l'identifiant et le compte.
+
+### Réponse 429 (trop de requêtes)
+
+**Cause probable :** la limite de débit est atteinte (100 requêtes par tranche de 15 minutes, configurée dans `server.ts`).
+**Solution :** patienter quelques minutes. Si la limite gêne un usage normal, ajuster la valeur du `rateLimit` dans `backend/server.ts`.
 
 ### Le projet en ligne ne répond plus après une longue inactivité
 
