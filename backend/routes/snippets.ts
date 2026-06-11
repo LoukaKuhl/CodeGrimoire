@@ -30,6 +30,17 @@ function validerDonneesSnippet(donnees: Partial<DonneesSnippet>): void {
     }
 }
 
+/**
+ * Vérifie que l'identifiant d'un snippet est un entier positif.
+ * @param id Identifiant reçu dans l'URL
+ * @throws ValidationError si l'identifiant n'est pas un entier positif
+ */
+function validerIdSnippet(id: string): void {
+    if (!/^\d+$/.test(id)) {
+        throw new ValidationError(`L'identifiant « ${id} » est invalide`)
+    }
+}
+
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const snippets = await listerSnippets(req.clientSupabase)
@@ -51,6 +62,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
 router.put('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
+        validerIdSnippet(req.params.id)
         validerDonneesSnippet(req.body)
         const snippet = await modifierSnippet(req.clientSupabase, req.params.id, req.body)
         res.json(snippet)
@@ -61,6 +73,7 @@ router.put('/:id', async (req: Request<{ id: string }>, res: Response, next: Nex
 
 router.delete('/:id', async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
+        validerIdSnippet(req.params.id)
         await supprimerSnippet(req.clientSupabase, req.params.id)
         res.json({ message: 'Snippet supprimé avec succès' })
     } catch (erreur) {
