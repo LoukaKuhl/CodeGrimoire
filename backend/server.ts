@@ -37,6 +37,19 @@ app.use((req: Request, res: Response) => {
     res.status(404).json({ error: 'Route introuvable' })
 })
 
+/**
+ * Indique si l'erreur est une erreur d'authentification PostgREST/Supabase (token invalide ou expiré).
+ * @param erreur Erreur interceptée par le middleware central
+ */
+function estErreurAuthSupabase(erreur: unknown): boolean {
+    return (
+        typeof erreur === 'object' &&
+        erreur !== null &&
+        'code' in erreur &&
+        erreur.code === 'PGRST301'
+    )
+}
+
 app.use((erreur: unknown, req: Request, res: Response, _next: NextFunction) => {
     console.error(erreur)
     if (erreur instanceof ValidationError) {
@@ -44,6 +57,9 @@ app.use((erreur: unknown, req: Request, res: Response, _next: NextFunction) => {
     }
     if (erreur instanceof NotFoundError) {
         return res.status(404).json({ error: erreur.message })
+    }
+    if (estErreurAuthSupabase(erreur)) {
+        return res.status(401).json({ error: 'Authentification invalide' })
     }
     res.status(500).json({ error: messageErreur(erreur) })
 })
