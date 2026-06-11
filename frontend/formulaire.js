@@ -12,7 +12,9 @@ if (snippetId) {
 
 async function chargerSnippetExistant() {
     try {
-        const response = await fetch(`${API_URL}/snippets`)
+        const response = await fetch(`${API_URL}/snippets`, {
+            headers: await enTetesAuth()
+        })
         const snippets = await response.json()
         const snippet = snippets.find(s => s.id === Number(snippetId))
 
@@ -47,7 +49,7 @@ async function sauvegarderSnippet() {
 
         const response = await fetch(url, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: await enTetesAuth(),
             body: JSON.stringify({ title, language, tags, code })
         })
 

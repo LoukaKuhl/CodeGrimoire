@@ -44,6 +44,14 @@ module.exports = [
         }
     },
 
+    // Frontend : enTetesAuth est défini dans supabase-client.js et consommé par app.js / formulaire.js
+    {
+        files: ['frontend/app.js', 'frontend/formulaire.js'],
+        languageOptions: {
+            globals: { enTetesAuth: 'readonly' }
+        }
+    },
+
     // Règles de la convention CodeGrimoire
     {
         rules: {

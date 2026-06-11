@@ -31,7 +31,9 @@ let tousLesSnippets = []
 
 async function chargerSnippets() {
     try {
-        const response = await fetch(`${API_URL}/snippets`)
+        const response = await fetch(`${API_URL}/snippets`, {
+            headers: await enTetesAuth()
+        })
         if (!response.ok) throw new Error('HTTP ' + response.status)
         const snippets = await response.json()
         tousLesSnippets = snippets
@@ -136,7 +138,8 @@ async function supprimerSnippet() {
 
     try {
         const response = await fetch(`${API_URL}/snippets/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: await enTetesAuth()
         })
 
         if (response.ok) {

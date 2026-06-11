@@ -26,3 +26,16 @@ const stockageSession = {
 const clientSupabase = supabase.createClient(urlSupabase, clePublishable, {
     auth: { storage: stockageSession },
 })
+
+/**
+ * Construit les en-têtes d'un appel à l'API protégée avec le token de la session courante.
+ * @returns {Promise<Object>} En-têtes incluant Content-Type et Authorization
+ */
+async function enTetesAuth() {
+    const { data } = await clientSupabase.auth.getSession()
+    const token = data.session.access_token
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }
+}
