@@ -21,9 +21,11 @@ boutonOeil.addEventListener('click', () => {
     if (champMotDePasse.type === 'password') {
         champMotDePasse.type = 'text'
         boutonOeil.innerHTML = oeilOuvert
+        boutonOeil.setAttribute('aria-label', 'Masquer le mot de passe')
     } else {
         champMotDePasse.type = 'password'
         boutonOeil.innerHTML = oeilBarre
+        boutonOeil.setAttribute('aria-label', 'Afficher le mot de passe')
     }
 })
 
