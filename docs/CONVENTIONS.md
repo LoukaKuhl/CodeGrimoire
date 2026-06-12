@@ -1,6 +1,6 @@
 # CONVENTIONS : CodeGrimoire
 
-**Version :** 5.2
+**Version :** 5.3
 **Projet :** CodeGrimoire, bloc-notes de code privé
 **Auteur :** Louka Kuhl, Agence418
 **Historique des versions :** tracé dans Git.
@@ -110,9 +110,10 @@ Le lancement se place en dernier, sauf quand il doit détecter un mode au charge
 Responsabilités séparées. La logique ne vit jamais dans la route.
 
 - `server.ts` : configuration Express, middlewares, montage des routes.
+- `middlewares/` : traitements transverses HTTP. `authentification.ts` exige un JWT valide (401 sinon) et attache à `req.clientSupabase` un client agissant au nom de l'utilisateur.
 - `routes/` : HTTP uniquement (routing, validation des entrées, transmission des erreurs au middleware central via `next`). Pas d'accès direct à Supabase.
-- `services/` : logique métier et accès aux données. Testable sans serveur HTTP.
-- `supabase.ts` : connexion à la base, utilisée par les services.
+- `services/` : logique métier et accès aux données. Reçoivent le client Supabase de l'utilisateur en paramètre. Testable sans serveur HTTP.
+- `supabase.ts` : fabrique un client Supabase par utilisateur à partir de son token (`creerClientPourUtilisateur`), utilisée par le middleware d'authentification.
 
 Le backend est en TypeScript : syntaxe `import`/`export` dans les sources, compilée en CommonJS par `tsc` vers `dist/`. Les interfaces (`Snippet`, `DonneesSnippet`) vivent dans le service qui les expose.
 
@@ -150,6 +151,7 @@ Table `snippets` :
 | `language` | text | Obligatoire |
 | `tags` | text | Optionnel, séparés par virgule |
 | `created_at` | timestamptz | Défaut `now()` |
+| `user_id` | uuid | Propriétaire, défaut `auth.uid()`, référence `auth.users(id)` |
 
 ---
 
@@ -189,13 +191,22 @@ Le middleware d'erreur central, dernier middleware de `server.ts`, fait correspo
 |--------|-----------|
 | `ValidationError` | 400 |
 | `NotFoundError` | 404 |
+| Erreur d'authentification Supabase (`PGRST301`) | 401 |
 | Autre | 500 |
 
 Les classes d'erreur typées vivent dans `backend/erreurs.ts` (seules classes autorisées, cf. Paradigme).
 
-Codes HTTP utilisés : 200, 201, 400, 404, 500.
+Codes HTTP utilisés : 200, 201, 400, 401, 404, 500. Pas de 403 : il n'existe pas de niveaux d'autorisation distincts ; l'isolation entre utilisateurs est assurée par la RLS (voir ci-dessous), pas par une vérification de rôle applicative.
 
-> À venir avec l'authentification : 401 (non authentifié) et 403 (non autorisé).
+---
+
+## Authentification et isolation des données
+
+L'API `/snippets` est protégée par le middleware `authentification` (`backend/middlewares/authentification.ts`), monté en tête du routeur. Il lit le JWT de l'en-tête `Authorization: Bearer <token>` ; si l'en-tête est absent ou mal formé, il répond **401** (`Authentification requise`) sans poursuivre. Sinon, il attache à `req.clientSupabase` un client Supabase qui agit **au nom de l'utilisateur** : son token est porté sur chaque requête, jamais la clé service-role.
+
+L'isolation des données repose sur la **Row Level Security** de PostgreSQL (script `backend/db/rls-snippets.sql`) : la colonne `user_id` (défaut `auth.uid()`) et quatre policies (`select`, `insert`, `update`, `delete`, toutes sur `auth.uid() = user_id`) garantissent que la base ne renvoie et ne modifie que les lignes de l'utilisateur courant. Le backend ne filtre pas lui-même par utilisateur : il délègue à la base.
+
+Quand le token est invalide ou expiré, PostgREST renvoie l'erreur `PGRST301`, que le middleware d'erreur central convertit en **401** (`Authentification invalide`).
 
 ---
 
@@ -227,8 +238,9 @@ fix : Cohérence formulaire.js (API_URL dynamique et ===)
 
 ## Évolutions prévues
 
+S4 réalisée : authentification Supabase, RLS sur la table et colonne `user_id` sont en place (voir « Authentification et isolation des données »). La restriction CORS prévue en S4 reste à finaliser au déploiement : l'origine est pilotée par `CORS_ORIGIN`, ouverte par défaut tant que la variable n'est pas définie.
+
 | Semaine | Évolution |
 |---------|-----------|
-| S4 | Authentification Supabase, RLS sur la table, CORS restreint, colonne `user_id` |
 | S5 | Dark mode, PWA |
 | S5 | Déploiement Vercel : coller la vraie URL dans `app.js` et `formulaire.js` |
