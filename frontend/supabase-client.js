@@ -33,6 +33,9 @@ const clientSupabase = supabase.createClient(urlSupabase, clePublishable, {
  */
 async function enTetesAuth() {
     const { data } = await clientSupabase.auth.getSession()
+    if (!data.session) {
+        throw new Error('Session absente : utilisateur non authentifié')
+    }
     const token = data.session.access_token
     return {
         'Content-Type': 'application/json',
