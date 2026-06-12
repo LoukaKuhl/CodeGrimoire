@@ -61,4 +61,4 @@ Un guide complet (architecture, carte des fichiers, référence de l'API, codes 
 
 ## Conventions
 
-Branches par fonctionnalité (`feature/`, `fix/`, `chore/`, `docs/`), messages de commit en français, fusion en fast-forward. Style JavaScript et TypeScript sans point-virgule, apostrophes simples. Détails dans `CONVENTIONS.md`.
+Branches par fonctionnalité (`feature/`, `fix/`, `chore/`, `docs/`), messages de commit en français, fusion en fast-forward. Style JavaScript et TypeScript sans point-virgule, apostrophes simples. Conventions du projet : voir `docs/CONVENTIONS.md`.
