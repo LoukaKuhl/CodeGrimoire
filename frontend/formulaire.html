@@ -1,88 +1,342 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeGrimoire - Nouveau snippet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { visibility: hidden; }</style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --paper:      #ece1c8;
+            --paper-2:    #e3d4b3;
+            --paper-edge: #c7b58c;
+            --ink:        #2a1d12;
+            --ink-2:      #4a3621;
+            --ink-mute:   #7a624a;
+            --rule:       rgba(42, 29, 18, .18);
+            --rule-soft:  rgba(42, 29, 18, .10);
+            --seal:       #8b2a1a;
+            --gold:       #b08a40;
+            --gold-glow:  rgba(176, 138, 64, .55);
+            --vignette-a: rgba(70, 45, 20, .18);
+            --vignette-b: rgba(70, 45, 20, .45);
+            --grain:      rgba(80, 55, 25, .06);
+            --selection:  rgba(176, 138, 64, .35);
+            --field-bg:     rgba(255, 250, 235, .55);
+            --field-bg-foc: rgba(255, 250, 235, .95);
+            --field-line:   rgba(42, 29, 18, .35);
+
+            --font-display: "Cinzel Decorative", "Cinzel", "IM Fell English", Georgia, serif;
+            --font-engrave: "Cinzel", "IM Fell English", Georgia, serif;
+            --font-body:    "IM Fell English", "EB Garamond", Georgia, serif;
+            --font-sc:      "IM Fell English SC", "Cinzel", Georgia, serif;
+            --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+        }
+        html[data-theme="dark"] {
+            --paper:      #100b07;
+            --paper-2:    #1a120a;
+            --paper-edge: #2a1d10;
+            --ink:        #ecdcb6;
+            --ink-2:      #d8c393;
+            --ink-mute:   #998363;
+            --rule:       rgba(236, 220, 182, .22);
+            --rule-soft:  rgba(236, 220, 182, .10);
+            --seal:       #c14a30;
+            --gold:       #d8a352;
+            --gold-glow:  rgba(216, 163, 82, .55);
+            --vignette-a: rgba(0, 0, 0, .55);
+            --vignette-b: rgba(0, 0, 0, .85);
+            --grain:      rgba(216, 163, 82, .05);
+            --selection:  rgba(216, 163, 82, .30);
+            --field-bg:     rgba(20, 14, 8, .55);
+            --field-bg-foc: rgba(30, 21, 12, .85);
+            --field-line:   rgba(236, 220, 182, .35);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; min-height: 100%; }
+        body {
+            font-family: var(--font-body); color: var(--ink); background: var(--paper);
+            -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+            visibility: hidden; /* révélé par session.js après vérification de la session */
+        }
+        ::selection { background: var(--selection); color: var(--ink); }
+
+        /* ── Fond ───────────────────────────────────────────────── */
+        .stage { position: relative; min-height: 100vh; isolation: isolate; padding: 92px 0 40px; }
+        .stage::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -3;
+            background:
+                radial-gradient(ellipse at 50% 32%, transparent 0%, transparent 38%, var(--vignette-a) 75%, var(--vignette-b) 100%),
+                radial-gradient(ellipse at 50% 50%, var(--paper-2) 0%, var(--paper) 70%);
+        }
+        .stage::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -2;
+            background-image:
+                radial-gradient(circle at 12% 18%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 78% 42%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 33% 78%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 88% 12%, var(--grain) 0 1px, transparent 1.5px);
+            background-size: 240px 240px, 320px 320px, 180px 180px, 200px 200px;
+            mix-blend-mode: multiply; opacity: .9;
+        }
+        html[data-theme="dark"] .stage::after { mix-blend-mode: screen; opacity: .6; }
+
+        /* ── Barre supérieure ───────────────────────────────────── */
+        .topbar {
+            position: absolute; top: 0; left: 0; right: 0; padding: 22px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: var(--font-sc); letter-spacing: .18em; font-size: 11px;
+            color: var(--ink-mute); z-index: 5; text-transform: uppercase;
+        }
+        .topbar .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+        .topbar .brand .mk { font-family: var(--font-display); font-size: 18px; letter-spacing: .08em; }
+        .topbar .brand .gl { color: var(--gold); font-size: 14px; line-height: 1; }
+        .back-link {
+            appearance: none; text-decoration: none; cursor: pointer;
+            font-family: var(--font-sc); font-size: 10px; letter-spacing: .22em;
+            text-transform: uppercase; color: var(--ink-mute);
+            padding: 8px 12px; border: 1px solid var(--rule);
+            transition: color .2s, border-color .2s;
+        }
+        .back-link:hover { color: var(--gold); border-color: var(--gold); }
+
+        /* ── Panneau parchemin ──────────────────────────────────── */
+        .panel-wrap { width: min(760px, 100%); margin: 0 auto; padding: 0 22px; }
+        .panel {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, .02) 0%, rgba(0, 0, 0, .02) 100%),
+                var(--paper-2);
+            border: 1px solid var(--paper-edge);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, .4) inset,
+                0 0 0 1px var(--rule-soft) inset,
+                0 30px 80px -20px rgba(0, 0, 0, .5);
+        }
+        html[data-theme="dark"] .panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .02) 0%, rgba(0, 0, 0, 0) 100%), var(--paper-2);
+            box-shadow:
+                0 1px 0 rgba(216, 163, 82, .08) inset,
+                0 0 0 1px rgba(216, 163, 82, .06) inset,
+                0 30px 80px -20px rgba(0, 0, 0, .8);
+        }
+        .panel-h {
+            padding: 26px 30px 18px;
+            border-bottom: 1px solid var(--rule);
+            background: linear-gradient(180deg, var(--paper-2), transparent);
+        }
+        .panel-eyebrow {
+            font-family: var(--font-sc); font-size: 10.5px; letter-spacing: .28em;
+            color: var(--ink-mute); text-transform: uppercase;
+        }
+        .panel-h h2 {
+            font-family: var(--font-display); font-weight: 700; font-size: 26px;
+            letter-spacing: .02em; color: var(--ink); margin: 6px 0 0;
+        }
+
+        /* ── Champs (style éditeur) ─────────────────────────────── */
+        .editor-body { display: flex; flex-direction: column; gap: 16px; padding: 22px 30px 26px; }
+        .ef-field { display: flex; flex-direction: column; gap: 6px; }
+        .ef-label {
+            font-family: var(--font-sc); font-size: 11px; letter-spacing: .26em;
+            color: var(--ink-mute); text-transform: uppercase;
+            display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .ef-label em {
+            font-family: var(--font-body); font-style: italic; font-size: 12.5px;
+            color: var(--ink-mute); letter-spacing: 0; text-transform: none;
+        }
+        .ef-input {
+            appearance: none; background: var(--field-bg);
+            border: 1px solid var(--rule); border-bottom: 1px solid var(--field-line);
+            font-family: var(--font-body); font-size: 15.5px; color: var(--ink);
+            padding: 11px 14px; outline: 0;
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+        .ef-input::placeholder { color: var(--ink-mute); font-style: italic; }
+        .ef-input:focus {
+            background: var(--field-bg-foc); border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+        .ef-select-wrap {
+            display: flex; align-items: center;
+            background: var(--field-bg); border: 1px solid var(--rule);
+            border-bottom: 1px solid var(--field-line);
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+        .ef-select-wrap:focus-within {
+            background: var(--field-bg-foc); border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+        .ef-select-glyph {
+            width: 42px; text-align: center; color: var(--gold);
+            font-family: var(--font-display); font-size: 16px;
+            border-right: 1px solid var(--rule-soft);
+            height: 44px; display: grid; place-items: center;
+        }
+        .ef-select {
+            flex: 1; appearance: none; background: transparent; border: 0; outline: 0;
+            font-family: var(--font-body); font-size: 15.5px; color: var(--ink);
+            padding: 0 14px; height: 44px; cursor: pointer;
+        }
+        .ef-select option { background: var(--paper-2); color: var(--ink); }
+
+        .ef-codewrap {
+            position: relative;
+            background: var(--paper);
+            border: 1px solid var(--rule); border-left: 3px solid var(--seal);
+            transition: border-color .2s, box-shadow .2s;
+        }
+        html[data-theme="dark"] .ef-codewrap { background: #0a0703; }
+        .ef-codewrap:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+        .ef-code {
+            width: 100%; appearance: none; background: transparent; border: 0; outline: 0;
+            font-family: var(--font-mono); font-size: 13.5px; line-height: 1.55;
+            color: var(--ink); padding: 14px; resize: vertical; min-height: 220px;
+        }
+        .ef-code::placeholder { color: var(--ink-mute); font-style: italic; }
+
+        /* ── Pied de panneau ────────────────────────────────────── */
+        .ef-foot {
+            display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+            padding-top: 14px; margin-top: 4px;
+            border-top: 1px solid var(--rule-soft);
+        }
+        .btn-ghost {
+            appearance: none; cursor: pointer; text-decoration: none;
+            background: transparent; border: 1px solid var(--rule);
+            color: var(--ink); font-family: var(--font-sc);
+            font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+            padding: 12px 18px;
+            transition: border-color .2s, color .2s, background .2s;
+            display: inline-flex; align-items: center;
+        }
+        .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-solid {
+            appearance: none; border: 0; cursor: pointer;
+            padding: 12px 20px; font-family: var(--font-display); font-weight: 700;
+            font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+            color: #f4e6c1; background: var(--seal);
+            box-shadow:
+                0 1px 0 rgba(255, 230, 180, .18) inset,
+                0 -1px 0 rgba(0, 0, 0, .35) inset,
+                0 6px 16px -6px rgba(139, 42, 26, .5);
+            display: inline-flex; align-items: center; gap: 10px;
+            transition: transform .12s, box-shadow .2s, background .2s;
+        }
+        .btn-solid:hover {
+            background: #a23420;
+            box-shadow:
+                0 1px 0 rgba(255, 230, 180, .22) inset,
+                0 -1px 0 rgba(0, 0, 0, .45) inset,
+                0 10px 22px -6px rgba(139, 42, 26, .7),
+                0 0 20px -4px var(--gold-glow);
+        }
+        .btn-solid:active { transform: translateY(1px); }
+        .btn-solid:disabled { opacity: .6; cursor: not-allowed; pointer-events: none; }
+        .btn-solid .bg { font-size: 14px; color: rgba(244, 230, 193, .85); }
+
+        @media (max-width: 640px) {
+            .stage { padding-top: 80px; }
+            .topbar { padding: 14px 16px; }
+            .panel-h, .editor-body { padding-left: 18px; padding-right: 18px; }
+            .ef-foot { flex-direction: column-reverse; align-items: stretch; }
+            .btn-ghost, .btn-solid { justify-content: center; }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-950 text-white min-h-screen">
+<body>
 
     <!-- ============ BARRE DE NAVIGATION ============ -->
-    <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-        <h1 class="text-xl font-bold text-purple-400">CodeGrimoire</h1>
-        <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm">
-            Retour
-        </a>
+    <nav class="topbar">
+        <div class="brand">
+            <span class="gl">&#10039;</span>
+            <span class="mk">CodeGrimoire</span>
+        </div>
+        <a href="index.html" class="back-link">← Retour au grimoire</a>
     </nav>
 
     <!-- ============ FORMULAIRE ============ -->
-    <div class="max-w-3xl mx-auto p-6">
+    <div class="stage">
+        <div class="panel-wrap">
+            <div class="panel">
+                <div class="panel-h">
+                    <div class="panel-eyebrow">Sceller au grimoire</div>
+                    <h2>Nouveau snippet</h2>
+                </div>
 
-        <h2 class="text-2xl font-bold mb-6">Nouveau snippet</h2>
+                <div class="editor-body">
 
-        <div class="flex flex-col gap-4">
+                    <!-- ===== Champ titre ===== -->
+                    <label class="ef-field" for="input-titre">
+                        <span class="ef-label">Titre du fragment</span>
+                        <input
+                            id="input-titre"
+                            type="text"
+                            class="ef-input"
+                            placeholder="Ex : Fonction de tri en JavaScript"
+                        >
+                    </label>
 
-            <!-- ===== Champ titre ===== -->
-            <div>
-                <label for="input-titre" class="block text-sm text-gray-400 mb-1">Titre</label>
-                <input 
-                    id="input-titre"
-                    type="text" 
-                    placeholder="Ex : Fonction de tri en JavaScript"
-                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                >
+                    <!-- ===== Champ langage ===== -->
+                    <label class="ef-field" for="input-langage">
+                        <span class="ef-label">Langue arcanique</span>
+                        <div class="ef-select-wrap">
+                            <span class="ef-select-glyph" aria-hidden="true">&#9670;</span>
+                            <select id="input-langage" class="ef-select">
+                                <option value="">Choisir un langage</option>
+                                <option value="JavaScript">JavaScript</option>
+                                <option value="Python">Python</option>
+                                <option value="HTML">HTML</option>
+                                <option value="CSS">CSS</option>
+                                <option value="SQL">SQL</option>
+                                <option value="PHP">PHP</option>
+                            </select>
+                        </div>
+                    </label>
+
+                    <!-- ===== Champ tags ===== -->
+                    <label class="ef-field" for="input-tags">
+                        <span class="ef-label">Étiquettes <em>(séparées par des virgules)</em></span>
+                        <input
+                            id="input-tags"
+                            type="text"
+                            class="ef-input"
+                            placeholder="Ex : tri, tableau, algorithme"
+                        >
+                    </label>
+
+                    <!-- ===== Champ code ===== -->
+                    <label class="ef-field" for="input-code">
+                        <span class="ef-label">Le sortilège lui-même</span>
+                        <div class="ef-codewrap">
+                            <textarea
+                                id="input-code"
+                                class="ef-code"
+                                rows="12"
+                                spellcheck="false"
+                                placeholder="// Couche ton code ici…"
+                            ></textarea>
+                        </div>
+                    </label>
+
+                    <!-- ===== Boutons ===== -->
+                    <div class="ef-foot">
+                        <a href="index.html" class="btn-ghost">Annuler</a>
+                        <button id="bouton-sauvegarder" class="btn-solid">
+                            <span class="bg">&#10022;</span> Sauvegarder
+                        </button>
+                    </div>
+
+                </div>
             </div>
-
-            <!-- ===== Champ langage ===== -->
-            <div>
-                <label for="input-langage" class="block text-sm text-gray-400 mb-1">Langage</label>
-                <select id="input-langage" class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500">
-                    <option value="">Choisir un langage</option>
-                    <option value="JavaScript">JavaScript</option>
-                    <option value="Python">Python</option>
-                    <option value="HTML">HTML</option>
-                    <option value="CSS">CSS</option>
-                    <option value="SQL">SQL</option>
-                    <option value="PHP">PHP</option>
-                </select>
-            </div>
-
-            <!-- ===== Champ tags ===== -->
-            <div>
-                <label for="input-tags" class="block text-sm text-gray-400 mb-1">Tags</label>
-                <input 
-                    id="input-tags"
-                    type="text" 
-                    placeholder="Ex : tri, tableau, algorithme"
-                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                >
-            </div>
-
-            <!-- ===== Champ code ===== -->
-            <div>
-                <label for="input-code" class="block text-sm text-gray-400 mb-1">Code</label>
-                <textarea 
-                    id="input-code"
-                    rows="12"
-                    placeholder="Colle ton code ici..."
-                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 font-mono text-sm"
-                ></textarea>
-            </div>
-
-            <!-- ===== Boutons ===== -->
-            <div class="flex gap-3 justify-end">
-                <a href="index.html" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
-                    Annuler
-                </a>
-                <button id="bouton-sauvegarder" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
-                    Sauvegarder
-                </button>
-            </div>
-
         </div>
     </div>
 

@@ -1,73 +1,443 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeGrimoire - Inscription</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --paper:      #ece1c8;
+            --paper-2:    #e3d4b3;
+            --paper-edge: #c7b58c;
+            --ink:        #2a1d12;
+            --ink-2:      #4a3621;
+            --ink-mute:   #7a624a;
+            --rule:       rgba(42, 29, 18, .18);
+            --rule-soft:  rgba(42, 29, 18, .10);
+            --seal:       #8b2a1a;
+            --gold:       #b08a40;
+            --gold-glow:  rgba(176, 138, 64, .55);
+            --vignette-a: rgba(70, 45, 20, .18);
+            --vignette-b: rgba(70, 45, 20, .45);
+            --grain:      rgba(80, 55, 25, .06);
+            --selection:  rgba(176, 138, 64, .35);
+            --field-bg:     rgba(255, 250, 235, .55);
+            --field-bg-foc: rgba(255, 250, 235, .95);
+            --field-line:   rgba(42, 29, 18, .35);
+
+            --font-display: "Cinzel Decorative", "Cinzel", "IM Fell English", Georgia, serif;
+            --font-engrave: "Cinzel", "IM Fell English", Georgia, serif;
+            --font-body:    "IM Fell English", "EB Garamond", Georgia, serif;
+            --font-sc:      "IM Fell English SC", "Cinzel", Georgia, serif;
+            --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+        }
+        html[data-theme="dark"] {
+            --paper:      #100b07;
+            --paper-2:    #1a120a;
+            --paper-edge: #2a1d10;
+            --ink:        #ecdcb6;
+            --ink-2:      #d8c393;
+            --ink-mute:   #998363;
+            --rule:       rgba(236, 220, 182, .22);
+            --rule-soft:  rgba(236, 220, 182, .10);
+            --seal:       #c14a30;
+            --gold:       #d8a352;
+            --gold-glow:  rgba(216, 163, 82, .55);
+            --vignette-a: rgba(0, 0, 0, .55);
+            --vignette-b: rgba(0, 0, 0, .85);
+            --grain:      rgba(216, 163, 82, .05);
+            --selection:  rgba(216, 163, 82, .30);
+            --field-bg:     rgba(20, 14, 8, .55);
+            --field-bg-foc: rgba(30, 21, 12, .85);
+            --field-line:   rgba(236, 220, 182, .35);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; min-height: 100%; }
+        body {
+            font-family: var(--font-body); color: var(--ink); background: var(--paper);
+            -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+        }
+        ::selection { background: var(--selection); color: var(--ink); }
+
+        /* ── Fond ───────────────────────────────────────────────── */
+        .stage {
+            position: relative; min-height: 100vh; isolation: isolate;
+            display: grid; place-items: center; padding: 80px 24px 64px;
+        }
+        .stage::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -3;
+            background:
+                radial-gradient(ellipse at 50% 32%, transparent 0%, transparent 38%, var(--vignette-a) 75%, var(--vignette-b) 100%),
+                radial-gradient(ellipse at 50% 50%, var(--paper-2) 0%, var(--paper) 70%);
+        }
+        .stage::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -2;
+            background-image:
+                radial-gradient(circle at 12% 18%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 78% 42%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 33% 78%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 88% 12%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 22% 55%, var(--grain) 0 1px, transparent 1.5px);
+            background-size: 240px 240px, 320px 320px, 180px 180px, 200px 200px, 360px 360px;
+            mix-blend-mode: multiply; opacity: .9;
+        }
+        html[data-theme="dark"] .stage::after { mix-blend-mode: screen; opacity: .6; }
+        .candle {
+            position: absolute; pointer-events: none; z-index: -1;
+            width: 520px; height: 520px; border-radius: 50%;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 60%);
+            filter: blur(20px); opacity: 0;
+        }
+        html[data-theme="dark"] .candle.l { top: -160px; left: -160px; opacity: .5; animation: flicker 5.4s ease-in-out infinite; }
+        html[data-theme="dark"] .candle.r { bottom: -200px; right: -180px; opacity: .4; animation: flicker 6.7s ease-in-out infinite reverse; }
+        @keyframes flicker {
+            0%, 100% { transform: scale(1) translate(0, 0); opacity: .5; }
+            35% { transform: scale(1.04) translate(6px, -4px); opacity: .65; }
+            62% { transform: scale(.97) translate(-4px, 2px); opacity: .38; }
+        }
+
+        /* ── Cadre grimoire (livre ouvert) ──────────────────────── */
+        .grimoire {
+            position: relative; width: min(980px, 100%); margin: 0 auto;
+            display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .04) 100%), var(--paper-2);
+            border: 1px solid var(--paper-edge);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, .5) inset,
+                0 0 0 1px var(--rule-soft) inset,
+                0 30px 90px -20px rgba(0, 0, 0, .45),
+                0 12px 28px -10px rgba(0, 0, 0, .35);
+            border-radius: 2px; overflow: hidden;
+        }
+        html[data-theme="dark"] .grimoire {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .02) 0%, rgba(0, 0, 0, 0) 100%), var(--paper-2);
+            box-shadow:
+                0 1px 0 rgba(216, 163, 82, .10) inset,
+                0 0 0 1px rgba(216, 163, 82, .06) inset,
+                0 40px 100px -20px rgba(0, 0, 0, .9),
+                0 16px 30px -10px rgba(0, 0, 0, .7);
+        }
+        .grimoire::before {
+            content: ""; position: absolute; left: 50%; top: 8%; bottom: 8%; width: 2px;
+            background:
+                linear-gradient(180deg, transparent, var(--rule) 12%, var(--rule) 88%, transparent),
+                linear-gradient(180deg, transparent, rgba(0, 0, 0, .18) 50%, transparent);
+            transform: translateX(-50%); pointer-events: none;
+        }
+        .deckle { position: absolute; inset: 18px; border: 1px solid var(--rule); pointer-events: none; }
+        .deckle::before { content: ""; position: absolute; inset: 6px; border: .5px solid var(--rule-soft); }
+        .corner { position: absolute; width: 34px; height: 34px; pointer-events: none; opacity: .85; }
+        .corner svg { width: 100%; height: 100%; display: block; color: var(--gold); }
+        .c-tl { top: 8px; left: 8px; }
+        .c-tr { top: 8px; right: 8px; transform: scaleX(-1); }
+        .c-bl { bottom: 8px; left: 8px; transform: scaleY(-1); }
+        .c-br { bottom: 8px; right: 8px; transform: scale(-1, -1); }
+
+        /* ── Page gauche : sceau ────────────────────────────────── */
+        .page-l {
+            position: relative; padding: 64px 44px 56px;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            min-height: 560px; min-width: 0;
+        }
+        .eyebrow {
+            font-family: var(--font-sc); font-size: 11px; letter-spacing: .32em;
+            color: var(--ink-mute); text-transform: uppercase; text-align: center;
+        }
+        .crest {
+            font-family: var(--font-display); font-weight: 900;
+            font-size: 40px; line-height: 1; letter-spacing: .04em;
+            color: var(--ink); text-align: center; margin: 18px 0 6px;
+        }
+        .crest .amp { color: var(--seal); font-style: italic; font-weight: 400; padding: 0 6px; }
+        .sub-crest {
+            font-family: var(--font-body); font-style: italic; color: var(--ink-2);
+            text-align: center; max-width: 280px; font-size: 15px; line-height: 1.5; margin: 0 auto;
+        }
+        .seal-wrap {
+            position: relative; width: min(280px, 100%); aspect-ratio: 1 / 1; max-width: 280px;
+            margin: 16px auto; display: grid; place-items: center; color: var(--gold);
+        }
+        .seal-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .seal-ring  { animation: rot 90s linear infinite; transform-box: fill-box; transform-origin: center; }
+        .seal-ring-r { animation: rot 140s linear infinite reverse; transform-box: fill-box; transform-origin: center; }
+        @keyframes rot { to { transform: rotate(360deg); } }
+        .seal-glyph {
+            position: relative; z-index: 2; width: 80px; height: 80px; color: var(--seal);
+            filter: drop-shadow(0 0 24px var(--gold-glow)) drop-shadow(0 0 2px var(--gold));
+            animation: pulse 4.2s ease-in-out infinite;
+        }
+        .seal-glyph svg { position: relative; inset: auto; width: 100%; height: 100%; display: block; }
+        @keyframes pulse {
+            0%, 100% { filter: drop-shadow(0 0 18px var(--gold-glow)) drop-shadow(0 0 1px var(--gold)); transform: translateY(0); }
+            50% { filter: drop-shadow(0 0 36px var(--gold-glow)) drop-shadow(0 0 4px var(--gold)); transform: translateY(-1px); }
+        }
+        .scroll-line { width: 140px; height: 1px; background: var(--rule); position: relative; margin: 0 auto; }
+        .scroll-line::before, .scroll-line::after {
+            content: ""; position: absolute; top: 50%; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--gold); transform: translateY(-50%);
+        }
+        .scroll-line::before { left: -3px; } .scroll-line::after { right: -3px; }
+        .verse {
+            font-family: var(--font-body); font-style: italic; font-size: 14.5px; line-height: 1.55;
+            color: var(--ink-2); text-align: center; max-width: 320px; margin-top: 18px;
+        }
+        .verse .drop {
+            font-family: var(--font-display); font-weight: 700; color: var(--seal);
+            font-size: 1.5em; line-height: 1; float: left; padding: 4px 6px 0 0; font-style: normal;
+        }
+
+        /* ── Page droite : formulaire ───────────────────────────── */
+        .page-r {
+            position: relative; padding: 64px 48px 48px;
+            display: flex; flex-direction: column; min-height: 560px; min-width: 0;
+        }
+        .folio {
+            position: absolute; top: 24px; right: 32px;
+            font-family: var(--font-sc); font-size: 10.5px; letter-spacing: .28em;
+            color: var(--ink-mute); text-transform: uppercase;
+        }
+        .title {
+            font-family: var(--font-display); font-weight: 700; font-size: 30px;
+            line-height: 1.05; letter-spacing: .02em; color: var(--ink); margin: 0;
+        }
+        .title .small {
+            display: block; font-family: var(--font-sc); font-size: 11px; letter-spacing: .32em;
+            color: var(--ink-mute); margin-bottom: 12px; text-transform: uppercase; font-weight: 400;
+        }
+        .preamble {
+            font-family: var(--font-body); font-style: italic; color: var(--ink-2);
+            font-size: 15px; line-height: 1.55; margin: 14px 0 0; max-width: 340px;
+        }
+        .form { margin-top: 28px; display: flex; flex-direction: column; gap: 18px; }
+        .field { position: relative; display: flex; flex-direction: column; gap: 6px; }
+        .field-label {
+            font-family: var(--font-sc); font-size: 11px; letter-spacing: .28em;
+            color: var(--ink-mute); text-transform: uppercase;
+            display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .field-label .hint {
+            font-family: var(--font-body); font-style: italic; letter-spacing: 0;
+            font-size: 12.5px; color: var(--ink-mute); text-transform: none;
+        }
+        .input-wrap {
+            position: relative; display: flex; align-items: center;
+            background: var(--field-bg); border: 1px solid var(--rule);
+            border-bottom: 1px solid var(--field-line);
+            transition: background .2s, border-color .2s, box-shadow .2s;
+        }
+        .input-wrap:hover { border-color: var(--ink-mute); }
+        .input-wrap:focus-within {
+            background: var(--field-bg-foc); border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow), 0 0 22px -8px var(--gold-glow) inset;
+        }
+        .input-wrap .glyph {
+            flex: none; width: 42px; height: 46px; display: grid; place-items: center;
+            color: var(--gold); font-size: 16px; border-right: 1px solid var(--rule-soft);
+            font-family: var(--font-display);
+        }
+        .input-wrap input {
+            flex: 1; appearance: none; background: transparent; border: 0; outline: 0;
+            font-family: var(--font-body); font-size: 17px; color: var(--ink);
+            padding: 12px 14px; height: 46px; min-width: 0; letter-spacing: .01em;
+        }
+        .input-wrap input::placeholder { color: var(--ink-mute); font-style: italic; opacity: .75; }
+        .reveal {
+            appearance: none; background: transparent; border: 0; cursor: pointer;
+            color: var(--ink-mute); padding: 0 12px; height: 46px;
+            display: grid; place-items: center;
+        }
+        .reveal:hover { color: var(--gold); }
+        .reveal svg { width: 20px; height: 20px; display: block; }
+
+        .btn {
+            appearance: none; border: 0; cursor: pointer; position: relative; margin-top: 4px;
+            padding: 16px 22px; font-family: var(--font-display); font-weight: 700;
+            font-size: 14px; letter-spacing: .28em; text-transform: uppercase;
+            color: #f4e6c1; background: var(--seal);
+            box-shadow:
+                0 1px 0 rgba(255, 230, 180, .18) inset,
+                0 -1px 0 rgba(0, 0, 0, .35) inset,
+                0 10px 24px -8px rgba(139, 42, 26, .55),
+                0 0 0 1px rgba(0, 0, 0, .15);
+            transition: transform .15s, box-shadow .25s, background .25s, letter-spacing .25s;
+            display: flex; align-items: center; justify-content: center; gap: 16px;
+        }
+        .btn:hover {
+            background: #a23420; letter-spacing: .32em;
+            box-shadow:
+                0 1px 0 rgba(255, 230, 180, .22) inset,
+                0 -1px 0 rgba(0, 0, 0, .45) inset,
+                0 14px 30px -8px rgba(139, 42, 26, .7),
+                0 0 26px -4px var(--gold-glow);
+        }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .7; pointer-events: none; }
+        .btn .seal-mini {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 1px solid rgba(244, 230, 193, .55);
+            display: grid; place-items: center; font-size: 12px;
+            color: #f4e6c1; font-family: var(--font-display);
+        }
+
+        /* Message d'erreur / succès — les classes sont posées par inscription.js. */
+        .message-erreur {
+            font-family: var(--font-body); font-style: italic; font-size: 13.5px;
+            text-align: center; margin: 16px 0 0; min-height: 1.2em; line-height: 1.45;
+        }
+        .message-erreur:empty { margin: 0; }
+        #message-erreur, #message-erreur.text-red-400 { color: var(--seal); }
+        #message-erreur.text-green-400 { color: #6a8c5a; font-style: normal; }
+        html[data-theme="dark"] #message-erreur.text-green-400 { color: #8fb56f; }
+
+        .foot {
+            margin-top: auto; padding-top: 28px;
+            font-family: var(--font-body); font-style: italic; font-size: 14px;
+            color: var(--ink-2); text-align: center;
+        }
+        .foot a {
+            color: var(--seal); text-decoration: none; font-weight: 600; font-style: normal;
+            font-family: var(--font-engrave); letter-spacing: .04em;
+            border-bottom: 1px dotted var(--rule); padding-bottom: 1px;
+        }
+        .foot a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+
+        @media (max-width: 860px) {
+            .grimoire { grid-template-columns: 1fr; }
+            .grimoire::before { display: none; }
+            .page-l { min-height: auto; padding: 56px 36px 28px; }
+            .page-r { min-height: auto; padding: 28px 36px 48px; }
+            .crest { font-size: 32px; }
+            .seal-wrap { width: min(220px, 60vw); max-width: 220px; }
+        }
+        @media (max-width: 520px) {
+            .page-l { padding: 44px 22px 20px; }
+            .page-r { padding: 24px 22px 36px; }
+            .crest { font-size: 26px; }
+            .title { font-size: 24px; }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
+<body>
 
-    <!-- ============ CARTE D'INSCRIPTION ============ -->
-    <div class="bg-gray-900 p-8 rounded-xl border border-gray-700 w-full max-w-md">
+    <span class="candle l" aria-hidden="true"></span>
+    <span class="candle r" aria-hidden="true"></span>
 
-        <!-- ===== Titre ===== -->
-        <h1 class="text-2xl font-bold text-purple-400 text-center mb-2">Créer un compte</h1>
+    <div class="stage">
+        <div class="grimoire">
+            <div class="deckle"></div>
+            <span class="corner c-tl"><svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="0.9"><path d="M2 32 V8 H32" stroke-linecap="square"/><path d="M6 32 V12 H32" opacity=".5"/><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="4"/><line x1="14" y1="8" x2="22" y2="8"/><circle cx="26" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+            <span class="corner c-tr"><svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="0.9"><path d="M2 32 V8 H32" stroke-linecap="square"/><path d="M6 32 V12 H32" opacity=".5"/><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="4"/><line x1="14" y1="8" x2="22" y2="8"/><circle cx="26" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+            <span class="corner c-bl"><svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="0.9"><path d="M2 32 V8 H32" stroke-linecap="square"/><path d="M6 32 V12 H32" opacity=".5"/><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="4"/><line x1="14" y1="8" x2="22" y2="8"/><circle cx="26" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+            <span class="corner c-br"><svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="0.9"><path d="M2 32 V8 H32" stroke-linecap="square"/><path d="M6 32 V12 H32" opacity=".5"/><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="4"/><line x1="14" y1="8" x2="22" y2="8"/><circle cx="26" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg></span>
 
-        <p class="text-gray-400 text-center text-sm mb-8">Inscris-toi pour gérer tes snippets</p>
-
-        <form id="formulaire-inscription" class="flex flex-col gap-4">
-
-            <!-- ===== Champ email ===== -->
-            <div>
-                <label for="champ-email" class="block text-sm text-gray-400 mb-1">Email</label>
-                <input
-                    type="email"
-                    id="champ-email"
-                    placeholder="ton@email.com"
-                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                >
-            </div>
-
-            <!-- ===== Champ mot de passe ===== -->
-            <div>
-                <label for="champ-mot-de-passe" class="block text-sm text-gray-400 mb-1">Mot de passe</label>
-                <div class="relative">
-                    <input
-                        type="password"
-                        id="champ-mot-de-passe"
-                        placeholder="••••••••"
-                        class="w-full bg-gray-800 text-white px-4 py-2 pr-12 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                    >
-                    <button
-                        type="button"
-                        id="bouton-oeil"
-                        aria-label="Afficher le mot de passe"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-400"
-                    ><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg></button>
+            <!-- ============ PAGE GAUCHE : SCEAU ============ -->
+            <aside class="page-l">
+                <div>
+                    <div class="eyebrow">Liber · Codicum · Arcanorum</div>
+                    <h1 class="crest">Code<span class="amp">&amp;</span>Grimoire</h1>
+                    <p class="sub-crest">Chaque scribe reçoit son tome relié, scellé à son nom.</p>
                 </div>
-            </div>
 
-            <!-- ===== Bouton inscription ===== -->
-            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold mt-2">
-                Créer un compte
-            </button>
+                <div class="seal-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 300 300">
+                        <defs>
+                            <path id="seal-outer" d="M 6,150 a 144,144 0 1,1 288,0 a 144,144 0 1,1 -288,0"/>
+                            <path id="seal-inner" d="M 34,150 a 116,116 0 1,0 232,0 a 116,116 0 1,0 -232,0"/>
+                        </defs>
+                        <circle cx="150" cy="150" r="148" fill="none" stroke="currentColor" stroke-width="0.6" opacity=".35"/>
+                        <circle cx="150" cy="150" r="144" fill="none" stroke="currentColor" stroke-width="1"/>
+                        <circle cx="150" cy="150" r="141" fill="none" stroke="currentColor" stroke-width="0.5" opacity=".5"/>
+                        <g class="seal-ring">
+                            <text font-family="Cinzel, serif" font-size="13" letter-spacing="4" fill="currentColor">
+                                <textPath href="#seal-outer" startOffset="0">✦ CODEX GRIMOIRE ✦ ARS COMPILANDI ✦ CODEX GRIMOIRE ✦ ARS COMPILANDI </textPath>
+                            </text>
+                        </g>
+                        <circle cx="150" cy="150" r="118" fill="none" stroke="currentColor" stroke-width="0.6" opacity=".6"/>
+                        <g class="seal-ring-r">
+                            <text font-family="Cinzel, serif" font-size="11" letter-spacing="3" fill="currentColor" opacity=".75">
+                                <textPath href="#seal-inner" startOffset="0">ANNO MMXXVI · VERBA CODICIS · MEMENTO ARGUMENTI · STET LITTERA · </textPath>
+                            </text>
+                        </g>
+                        <circle cx="150" cy="150" r="92" fill="none" stroke="currentColor" stroke-width="0.6" opacity=".55" stroke-dasharray="2 6"/>
+                        <circle cx="150" cy="150" r="70" fill="none" stroke="currentColor" stroke-width="0.6" opacity=".5"/>
+                        <circle cx="150" cy="6"   r="2.4" fill="currentColor"/>
+                        <circle cx="294" cy="150" r="2.4" fill="currentColor"/>
+                        <circle cx="150" cy="294" r="2.4" fill="currentColor"/>
+                        <circle cx="6"   cy="150" r="2.4" fill="currentColor"/>
+                    </svg>
+                    <span class="seal-glyph">
+                        <svg viewBox="0 0 100 100" aria-hidden="true">
+                            <path d="M50 5 L76.4 86.4 L7.2 36.1 L92.8 36.1 L23.6 86.4 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+                            <circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                        </svg>
+                    </span>
+                </div>
 
-        </form>
+                <div>
+                    <div class="scroll-line"></div>
+                    <p class="verse">
+                        <span class="drop">F</span>orge ton nom dans la cire et l'or ; un volume vierge t'attend, relié de cuir tendre, prêt à recevoir tes premiers sortilèges.
+                    </p>
+                </div>
+            </aside>
 
-        <!-- ===== Message d'erreur ===== -->
-        <p id="message-erreur" class="text-center text-sm text-red-400 mt-4"></p>
+            <!-- ============ PAGE DROITE : FORMULAIRE ============ -->
+            <section class="page-r">
+                <span class="folio">Folio · Annexe II</span>
+                <h2 class="title">
+                    <span class="small">Annexe — Nouveau volume</span>
+                    Commencer un grimoire
+                </h2>
+                <p class="preamble">
+                    Inscris les noms par lesquels le codex te connaîtra, et un tome neuf sera scellé à ton nom.
+                </p>
 
-        <!-- ===== Lien connexion ===== -->
-        <p class="text-center text-sm text-gray-500 mt-6">
-            Déjà un compte ?
-            <a href="connexion.html" class="text-purple-400 hover:text-purple-300">
-                Se connecter
-            </a>
-        </p>
+                <form id="formulaire-inscription" class="form" novalidate>
+                    <div class="field">
+                        <label class="field-label" for="champ-email">
+                            <span>Nom véritable</span><span class="hint">(adresse e-mail)</span>
+                        </label>
+                        <div class="input-wrap">
+                            <span class="glyph" aria-hidden="true">&#9760;</span>
+                            <input type="email" id="champ-email" placeholder="scribe@grimoire.arc" autocomplete="email">
+                        </div>
+                    </div>
 
+                    <div class="field">
+                        <label class="field-label" for="champ-mot-de-passe">
+                            <span>Incantation</span><span class="hint">(ton mot de passe)</span>
+                        </label>
+                        <div class="input-wrap">
+                            <span class="glyph" aria-hidden="true">&#9791;</span>
+                            <input type="password" id="champ-mot-de-passe" placeholder="••••••••••••" autocomplete="new-password">
+                            <button type="button" id="bouton-oeil" class="reveal" aria-label="Afficher le mot de passe"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg></button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        <span class="seal-mini">&#10022;</span>
+                        Sceller le nouveau grimoire
+                        <span class="seal-mini">&#8594;</span>
+                    </button>
+                </form>
+
+                <p id="message-erreur" class="message-erreur text-red-400"></p>
+
+                <div class="foot">
+                    Déjà scribe dans ce codex ?
+                    <a href="connexion.html">Ouvrir le Grimoire →</a>
+                </div>
+            </section>
+        </div>
     </div>
 
     <!-- ============ SUPABASE ============ -->
