@@ -1,71 +1,435 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeGrimoire</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { visibility: hidden; }</style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Clair — parchemin vieilli */
+            --paper:      #ece1c8;
+            --paper-2:    #e3d4b3;
+            --paper-edge: #c7b58c;
+            --ink:        #2a1d12;
+            --ink-2:      #4a3621;
+            --ink-mute:   #7a624a;
+            --rule:       rgba(42, 29, 18, .18);
+            --rule-soft:  rgba(42, 29, 18, .10);
+            --seal:       #8b2a1a;
+            --gold:       #b08a40;
+            --gold-glow:  rgba(176, 138, 64, .55);
+            --vignette-a: rgba(70, 45, 20, .18);
+            --vignette-b: rgba(70, 45, 20, .45);
+            --grain:      rgba(80, 55, 25, .06);
+            --selection:  rgba(176, 138, 64, .35);
+            --field-bg:     rgba(255, 250, 235, .55);
+            --field-bg-foc: rgba(255, 250, 235, .95);
+            --field-line:   rgba(42, 29, 18, .35);
+
+            --font-display: "Cinzel Decorative", "Cinzel", "IM Fell English", Georgia, serif;
+            --font-engrave: "Cinzel", "IM Fell English", Georgia, serif;
+            --font-body:    "IM Fell English", "EB Garamond", Georgia, serif;
+            --font-sc:      "IM Fell English SC", "Cinzel", Georgia, serif;
+            --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+        }
+        html[data-theme="dark"] {
+            /* Sombre — obsidienne à la chandelle */
+            --paper:      #100b07;
+            --paper-2:    #1a120a;
+            --paper-edge: #2a1d10;
+            --ink:        #ecdcb6;
+            --ink-2:      #d8c393;
+            --ink-mute:   #998363;
+            --rule:       rgba(236, 220, 182, .22);
+            --rule-soft:  rgba(236, 220, 182, .10);
+            --seal:       #c14a30;
+            --gold:       #d8a352;
+            --gold-glow:  rgba(216, 163, 82, .55);
+            --vignette-a: rgba(0, 0, 0, .55);
+            --vignette-b: rgba(0, 0, 0, .85);
+            --grain:      rgba(216, 163, 82, .05);
+            --selection:  rgba(216, 163, 82, .30);
+            --field-bg:     rgba(20, 14, 8, .55);
+            --field-bg-foc: rgba(30, 21, 12, .85);
+            --field-line:   rgba(236, 220, 182, .35);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; min-height: 100%; }
+        body {
+            font-family: var(--font-body);
+            color: var(--ink);
+            background: var(--paper);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+            visibility: hidden; /* révélé par session.js après vérification de la session */
+        }
+        ::selection { background: var(--selection); color: var(--ink); }
+
+        /* ── Fond de page : parchemin + vignette + grain ────────── */
+        .stage {
+            position: relative; min-height: 100vh; isolation: isolate;
+            padding: 96px 0 28px;
+        }
+        .stage::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -3;
+            background:
+                radial-gradient(ellipse at 50% 32%, transparent 0%, transparent 38%, var(--vignette-a) 75%, var(--vignette-b) 100%),
+                radial-gradient(ellipse at 50% 50%, var(--paper-2) 0%, var(--paper) 70%);
+        }
+        .stage::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -2;
+            background-image:
+                radial-gradient(circle at 12% 18%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 78% 42%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 33% 78%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 62% 88%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 88% 12%, var(--grain) 0 1px, transparent 1.5px),
+                radial-gradient(circle at 22% 55%, var(--grain) 0 1px, transparent 1.5px);
+            background-size: 240px 240px, 320px 320px, 180px 180px, 280px 280px, 200px 200px, 360px 360px;
+            mix-blend-mode: multiply; opacity: .9;
+        }
+        html[data-theme="dark"] .stage::after { mix-blend-mode: screen; opacity: .6; }
+
+        /* lueur de chandelle, sombre uniquement */
+        .candle {
+            position: absolute; pointer-events: none; z-index: -1;
+            width: 520px; height: 520px; border-radius: 50%;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 60%);
+            filter: blur(20px); opacity: 0;
+        }
+        html[data-theme="dark"] .candle.l { top: -160px; left: -160px; opacity: .5; animation: flicker 5.4s ease-in-out infinite; }
+        html[data-theme="dark"] .candle.r { bottom: -200px; right: -180px; opacity: .4; animation: flicker 6.7s ease-in-out infinite reverse; }
+        @keyframes flicker {
+            0%, 100% { transform: scale(1) translate(0, 0); opacity: .5; }
+            35% { transform: scale(1.04) translate(6px, -4px); opacity: .65; }
+            62% { transform: scale(.97) translate(-4px, 2px); opacity: .38; }
+            80% { transform: scale(1.02) translate(2px, 3px); opacity: .55; }
+        }
+
+        /* ── Barre supérieure ───────────────────────────────────── */
+        .topbar {
+            position: absolute; top: 0; left: 0; right: 0; padding: 22px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: var(--font-sc); letter-spacing: .18em; font-size: 11px;
+            color: var(--ink-mute); z-index: 5; text-transform: uppercase;
+        }
+        .topbar .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+        .topbar .brand .mk { font-family: var(--font-display); font-size: 18px; letter-spacing: .08em; }
+        .topbar .brand .gl { color: var(--gold); font-size: 14px; line-height: 1; }
+        .topbar .meta { display: flex; gap: 14px; align-items: center; }
+
+        .btn-solid {
+            appearance: none; border: 0; cursor: pointer; text-decoration: none;
+            padding: 0 18px; height: 40px;
+            font-family: var(--font-display); font-weight: 700;
+            font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+            color: #f4e6c1; background: var(--seal);
+            box-shadow:
+                0 1px 0 rgba(255, 230, 180, .18) inset,
+                0 -1px 0 rgba(0, 0, 0, .35) inset,
+                0 6px 16px -6px rgba(139, 42, 26, .5);
+            display: inline-flex; align-items: center; gap: 10px;
+            transition: transform .12s, box-shadow .2s, background .2s;
+        }
+        .btn-solid:hover {
+            background: #a23420;
+            box-shadow:
+                0 1px 0 rgba(255, 230, 180, .22) inset,
+                0 -1px 0 rgba(0, 0, 0, .45) inset,
+                0 10px 22px -6px rgba(139, 42, 26, .7),
+                0 0 20px -4px var(--gold-glow);
+        }
+        .btn-solid:active { transform: translateY(1px); }
+        .btn-solid .bg { font-size: 14px; color: rgba(244, 230, 193, .85); }
+
+        .signout {
+            appearance: none; background: transparent; cursor: pointer;
+            font-family: var(--font-sc); font-size: 10px; letter-spacing: .22em;
+            text-transform: uppercase; color: var(--ink-mute);
+            padding: 8px 10px; border: 1px solid var(--rule);
+            transition: color .2s, border-color .2s;
+        }
+        .signout:hover { color: var(--seal); border-color: var(--seal); }
+
+        /* ── Atelier ────────────────────────────────────────────── */
+        .workspace {
+            width: min(1320px, 100%); margin: 0 auto; padding: 12px 22px 40px;
+            display: flex; flex-direction: column; gap: 18px;
+        }
+        .ws-bar { display: flex; gap: 14px; align-items: center; }
+        .ws-search {
+            flex: 1; display: flex; align-items: center; height: 48px;
+            background: var(--field-bg); border: 1px solid var(--rule);
+            border-bottom: 1px solid var(--field-line);
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+        .ws-search:focus-within {
+            border-color: var(--gold); background: var(--field-bg-foc);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+        .ws-search-glyph {
+            width: 46px; display: grid; place-items: center; color: var(--gold);
+            font-size: 18px; font-family: var(--font-display);
+            border-right: 1px solid var(--rule-soft); height: 100%;
+        }
+        .ws-search input {
+            flex: 1; appearance: none; background: transparent; border: 0; outline: 0;
+            height: 100%; padding: 0 14px; min-width: 0;
+            font-family: var(--font-body); font-size: 16px; color: var(--ink);
+            font-style: italic;
+        }
+        .ws-search input::placeholder { color: var(--ink-mute); font-style: italic; }
+
+        /* ── Grille : liste + détail ────────────────────────────── */
+        .ws-grid {
+            display: grid; grid-template-columns: 360px 1fr; gap: 18px;
+            min-height: calc(100vh - 220px); align-items: stretch;
+        }
+        .ws-grid > * {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, .02) 0%, rgba(0, 0, 0, .02) 100%),
+                var(--paper-2);
+            border: 1px solid var(--paper-edge);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, .4) inset,
+                0 0 0 1px var(--rule-soft) inset,
+                0 10px 28px -14px rgba(0, 0, 0, .35);
+            min-width: 0; min-height: 0;
+        }
+        html[data-theme="dark"] .ws-grid > * {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .02) 0%, rgba(0, 0, 0, 0) 100%), var(--paper-2);
+            box-shadow:
+                0 1px 0 rgba(216, 163, 82, .08) inset,
+                0 0 0 1px rgba(216, 163, 82, .06) inset,
+                0 14px 32px -16px rgba(0, 0, 0, .7);
+        }
+
+        /* ── Liste ──────────────────────────────────────────────── */
+        .ws-list { display: flex; flex-direction: column; padding: 14px 10px; }
+        .list-h {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding: 0 8px 10px; border-bottom: 1px solid var(--rule-soft);
+            margin-bottom: 8px;
+            font-family: var(--font-sc); font-size: 10.5px; letter-spacing: .22em;
+            color: var(--ink-mute); text-transform: uppercase;
+        }
+
+        /* #liste-snippets reçoit les cartes générées par app.js.
+           On habille la structure (div[data-id] > p + span) ; les
+           classes Tailwind émises par app.js sont sans effet ici. */
+        #liste-snippets {
+            display: flex; flex-direction: column; gap: 2px;
+            overflow-y: auto; flex: 1; max-height: calc(100vh - 280px);
+            scrollbar-width: thin; scrollbar-color: var(--rule) transparent;
+        }
+        #liste-snippets > p {
+            font-family: var(--font-body); font-style: italic; font-size: 14px;
+            color: var(--ink-mute); text-align: center; margin: 32px 16px 0;
+        }
+        #liste-snippets [data-id] {
+            cursor: pointer; width: 100%;
+            display: flex; flex-direction: column; gap: 7px;
+            padding: 12px 12px; border-left: 2px solid transparent;
+            transition: background .15s, border-color .15s;
+        }
+        #liste-snippets [data-id]:hover {
+            background: rgba(176, 138, 64, .08); border-left-color: var(--gold);
+        }
+        #liste-snippets [data-id] p {
+            margin: 0; font-family: var(--font-engrave);
+            font-size: 14.5px; color: var(--ink); letter-spacing: .02em; line-height: 1.3;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        #liste-snippets [data-id] span {
+            align-self: flex-start;
+            font-family: var(--font-sc); font-size: 9.5px; letter-spacing: .18em;
+            text-transform: uppercase; padding: 3px 8px;
+            background: var(--field-bg); border: 1px solid var(--rule);
+            color: var(--ink-2);
+        }
+
+        /* ── Détail ─────────────────────────────────────────────── */
+        .ws-detail { display: flex; flex-direction: column; }
+        .detail {
+            display: flex; flex-direction: column; gap: 18px;
+            padding: 28px 32px; height: 100%;
+            animation: detail-in .35s ease-out;
+        }
+        @keyframes detail-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        .detail-h {
+            display: flex; flex-direction: column; gap: 8px;
+            border-bottom: 1px solid var(--rule); padding-bottom: 16px;
+        }
+        .dh-folio {
+            font-family: var(--font-sc); font-size: 10.5px; letter-spacing: .24em;
+            color: var(--ink-mute); text-transform: uppercase;
+        }
+        #detail-titre {
+            font-family: var(--font-display); font-weight: 700; font-size: 26px;
+            line-height: 1.1; letter-spacing: .02em; color: var(--ink); margin: 0;
+        }
+        .dh-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        /* app.js réécrit la className de #detail-badge : on l'habille par id. */
+        #detail-badge {
+            font-family: var(--font-sc); font-size: 10px; letter-spacing: .2em;
+            text-transform: uppercase; padding: 4px 10px;
+            background: var(--field-bg); border: 1px solid var(--rule);
+            color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px;
+        }
+        #detail-tags {
+            font-family: var(--font-body); font-style: italic;
+            color: var(--ink-2); font-size: 15px; line-height: 1.5;
+            margin: 0; padding-left: 14px; border-left: 2px solid var(--seal);
+        }
+        #detail-tags:empty { display: none; }
+
+        .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-action {
+            appearance: none; cursor: pointer;
+            background: var(--field-bg); border: 1px solid var(--rule);
+            font-family: var(--font-engrave); font-size: 12px;
+            letter-spacing: .16em; text-transform: uppercase;
+            color: var(--ink); padding: 9px 14px;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: border-color .2s, color .2s, background .2s;
+        }
+        .btn-action:hover { border-color: var(--gold); color: var(--gold); background: var(--field-bg-foc); }
+        .btn-action.danger:hover { border-color: var(--seal); color: var(--seal); }
+        /* Glyphes en ::before : survivent aux réécritures de textContent (#btn-copier). */
+        .btn-action::before {
+            font-family: var(--font-display); font-size: 14px; color: var(--gold);
+        }
+        .btn-action:hover::before { color: inherit; }
+        #btn-copier::before { content: "\2398"; }
+        [data-action="modifier"]::before { content: "\270E"; }
+        [data-action="supprimer"]::before { content: "\263D"; }
+
+        /* ── Bloc de code ───────────────────────────────────────── */
+        .detail-code {
+            position: relative; flex: 1;
+            background: var(--paper);
+            border: 1px solid var(--rule); border-left: 4px solid var(--seal);
+            overflow: hidden; min-height: 200px;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, .4) inset, 0 -1px 0 rgba(0, 0, 0, .05) inset;
+        }
+        html[data-theme="dark"] .detail-code {
+            background: #0a0703;
+            box-shadow: 0 0 0 1px rgba(216, 163, 82, .06) inset, 0 -1px 0 rgba(0, 0, 0, .4) inset;
+        }
+        .dc-spine {
+            position: absolute; top: 0; right: 0;
+            font-family: var(--font-sc); font-size: 9.5px; letter-spacing: .28em;
+            color: var(--ink-mute); text-transform: uppercase; padding: 6px 12px;
+            border-left: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+            background: var(--paper-2); z-index: 2;
+        }
+        #detail-code {
+            margin: 0; padding: 18px;
+            font-family: var(--font-mono); font-size: 13.5px; line-height: 1.65;
+            color: var(--ink); overflow: auto;
+            max-height: calc(100vh - 380px);
+            white-space: pre; scrollbar-width: thin; scrollbar-color: var(--rule) transparent;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+        @media (max-width: 980px) {
+            .stage { padding-top: 84px; }
+            .workspace { padding: 8px 14px 32px; }
+            .ws-grid { grid-template-columns: 1fr; min-height: auto; }
+            #liste-snippets { max-height: 420px; }
+            #detail-code { max-height: 500px; }
+        }
+        @media (max-width: 640px) {
+            .ws-bar { flex-direction: column; align-items: stretch; }
+            .topbar { padding: 14px 16px; }
+            .topbar .brand .mk { font-size: 15px; }
+            .detail { padding: 20px 18px; }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-950 text-white min-h-screen">
+<body>
 
-    <nav class="bg-gray-900 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-        <h1 class="text-xl font-bold text-purple-400">CodeGrimoire</h1>
-        <div class="flex items-center gap-3">
-            <a href="formulaire.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
-                + Nouveau snippet
+    <span class="candle l" aria-hidden="true"></span>
+    <span class="candle r" aria-hidden="true"></span>
+
+    <nav class="topbar">
+        <div class="brand">
+            <span class="gl">&#10039;</span>
+            <span class="mk">CodeGrimoire</span>
+        </div>
+        <div class="meta">
+            <a href="formulaire.html" class="btn-solid">
+                <span class="bg">&#10022;</span> Nouveau fragment
             </a>
-            <button id="bouton-deconnexion" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm">
-                Déconnexion
-            </button>
+            <button id="bouton-deconnexion" class="signout">Déconnexion</button>
         </div>
     </nav>
 
-    <div class="flex h-screen">
+    <div class="stage">
+        <div class="workspace">
 
-        <aside class="w-80 bg-gray-900 border-r border-gray-700 flex flex-col">
-            <div class="p-4">
-                <input
-                    id="input-recherche"
-                    type="text"
-                    aria-label="Rechercher un snippet"
-                    placeholder="Rechercher un snippet..."
-                    class="w-full bg-gray-800 text-white px-4 py-2 rounded-lg text-sm border border-gray-600 focus:outline-none focus:border-purple-500"
-                >
-            </div>
-            <div id="liste-snippets" class="flex-1 overflow-y-auto px-4">
-                <p class="text-gray-500 text-sm text-center mt-8">Aucun snippet pour l'instant</p>
-            </div>
-        </aside>
-
-        <main class="flex-1 bg-gray-950 p-6">
-            <div id="detail-snippet">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <h2 id="detail-titre" class="text-xl font-bold">Titre du snippet</h2>
-                        <span id="detail-badge" class="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-700 text-white">
-                            Langage
-                        </span>
-                    </div>
-                    <div id="actions-detail" class="flex gap-2">
-                        <button id="btn-copier" data-action="copier" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
-                            Copier
-                        </button>
-                        <button data-action="modifier" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
-                            Modifier
-                        </button>
-                        <button data-action="supprimer" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                            Supprimer
-                        </button>
-                    </div>
+            <div class="ws-bar">
+                <div class="ws-search">
+                    <span class="ws-search-glyph">&#9906;</span>
+                    <input
+                        id="input-recherche"
+                        type="text"
+                        aria-label="Rechercher un snippet"
+                        placeholder="Chercher un fragment, un mot, une rune…"
+                    >
                 </div>
-                <div id="detail-tags" class="text-sm text-gray-400 mb-4"></div>
-                <pre id="detail-code" class="bg-gray-900 rounded-lg p-4 overflow-x-auto text-sm text-green-400">// Ton code apparaîtra ici</pre>
             </div>
-        </main>
 
+            <div class="ws-grid">
+
+                <!-- ============ LISTE DES FRAGMENTS ============ -->
+                <section class="ws-list">
+                    <div class="list-h">
+                        <span>Fragments</span>
+                        <span>Le grimoire</span>
+                    </div>
+                    <div id="liste-snippets">
+                        <p>Aucun snippet pour l'instant</p>
+                    </div>
+                </section>
+
+                <!-- ============ DÉTAIL DU FRAGMENT ============ -->
+                <section class="ws-detail">
+                    <article id="detail-snippet" class="detail">
+                        <header class="detail-h">
+                            <div class="dh-folio">Folio · le grimoire</div>
+                            <h2 id="detail-titre">Titre du snippet</h2>
+                            <div class="dh-meta">
+                                <span id="detail-badge">Langage</span>
+                            </div>
+                            <p id="detail-tags"></p>
+                        </header>
+
+                        <div id="actions-detail" class="detail-actions">
+                            <button id="btn-copier" data-action="copier" class="btn-action">Copier</button>
+                            <button data-action="modifier" class="btn-action">Modifier</button>
+                            <button data-action="supprimer" class="btn-action danger">Supprimer</button>
+                        </div>
+
+                        <div class="detail-code">
+                            <div class="dc-spine">Grimoire</div>
+                            <pre id="detail-code">// Ton code apparaîtra ici</pre>
+                        </div>
+                    </article>
+                </section>
+
+            </div>
+        </div>
     </div>
 
     <!-- ============ SUPABASE ============ -->
