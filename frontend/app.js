@@ -1,6 +1,9 @@
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:3000'
-    : 'https://[url-vercel-a-definir-en-s5].vercel.app'
+const API_URL =
+    (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://localhost:3000'
+        // Seule ligne à mettre à jour le jour du déploiement (vraie URL Vercel).
+        // Doit rester identique dans app.js et formulaire.js.
+        : 'https://URL-VERCEL-A-DEFINIR-AU-DEPLOIEMENT.vercel.app'
 
 const badgeColors = {
     'JavaScript': 'bg-yellow-500 text-black',
