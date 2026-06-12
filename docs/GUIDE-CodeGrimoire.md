@@ -218,6 +218,12 @@ Sur la page de connexion, l'utilisateur saisit ses identifiants. Supabase vérif
 
 La session est conservée par le navigateur. À chaque appel à l'API, le frontend joint le token dans l'en-tête `Authorization`. C'est ce qui permet au backend de savoir qui fait la demande.
 
+### Limitation connue : stockage du token
+
+Le token de session est conservé côté navigateur dans `localStorage` ou `sessionStorage` (selon le choix « Se souvenir de moi », voir `supabase-client.js`). Ce stockage est lisible par n'importe quel script de la page : en cas de faille **XSS** (injection de code dans la page), le token pourrait être volé. C'est une limitation connue du stockage par `localStorage`, courante avec Supabase côté client.
+
+Atténuation en place : l'application n'insère jamais de contenu utilisateur brut dans le DOM. Les valeurs sont rendues via `textContent`, et les rares insertions en `innerHTML` (liste des snippets) passent par `echapperHtml`, ce qui neutralise le HTML injecté. La surface d'attaque XSS est donc réduite. Un durcissement supplémentaire (token en cookie `httpOnly`) reste possible mais sort du périmètre actuel.
+
 ### Expiration
 
 Le token a une durée de vie limitée. Quand il expire, l'API répond 401 et il faut se reconnecter.
