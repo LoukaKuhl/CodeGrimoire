@@ -29,6 +29,8 @@ async function chargerSnippetExistant() {
     }
 }
 
+document.getElementById('bouton-sauvegarder').addEventListener('click', sauvegarderSnippet)
+
 async function sauvegarderSnippet() {
     const title = document.getElementById('input-titre').value
     const language = document.getElementById('input-langage').value

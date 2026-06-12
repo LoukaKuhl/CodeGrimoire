@@ -74,6 +74,18 @@ document.getElementById('input-recherche').addEventListener('input', (e) => {
     rechercherSnippets(e.target.value)
 })
 
+document.getElementById('actions-detail').addEventListener('click', (e) => {
+    const bouton = e.target.closest('[data-action]')
+    if (!bouton) return
+
+    const actions = {
+        copier: copierSnippet,
+        modifier: modifierSnippet,
+        supprimer: supprimerSnippet
+    }
+    actions[bouton.dataset.action]?.()
+})
+
 function afficherDetail(id) {
     const snippet = tousLesSnippets.find(s => s.id === id)
     if (!snippet) return

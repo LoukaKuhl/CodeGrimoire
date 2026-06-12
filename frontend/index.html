@@ -49,14 +49,14 @@
                             Langage
                         </span>
                     </div>
-                    <div class="flex gap-2">
-                        <button id="btn-copier" onclick="copierSnippet()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
+                    <div id="actions-detail" class="flex gap-2">
+                        <button id="btn-copier" data-action="copier" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
                             Copier
                         </button>
-                        <button onclick="modifierSnippet()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
+                        <button data-action="modifier" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
                             Modifier
                         </button>
-                        <button onclick="supprimerSnippet()" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                        <button data-action="supprimer" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
                             Supprimer
                         </button>
                     </div>
